@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tienda</title>
+</head>
+<body>
+    <p><a href="{% url 'detalle_mascota' mascota.id %}">&larr; volver a {{ mascota.nombre }}</a></p>
+    <h1>🛒 Tienda para {{ mascota.nombre }}</h1>
+
+    {% if items %}
+        <ul>
+        {% for item in items %}
+            <li>
+                {{ item.emoji }} {{ item.nombre }}
+                (+{{ item.precio_felicidad }} felicidad, -{{ item.reduce_hambre }} hambre)
+                <form action="{% url 'comprar_item' mascota.id item.id %}" method="post" style="display:inline">
+                    {% csrf_token %}
+                    <button type="submit">Comprar</button>
+                </form>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay items en la tienda todavia. Agrega algunos desde el admin.</p>
+    {% endif %}
+</body>
+</html>

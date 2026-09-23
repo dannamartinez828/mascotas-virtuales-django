@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ mascota.nombre }}</title>
+</head>
+<body>
+    <p><a href="{% url 'listar_mascotas' %}">&larr; volver</a></p>
+
+    <h1>{{ mascota.nombre }} ({{ mascota.get_especie_display }})</h1>
+
+    <p>Hambre: {{ mascota.hambre }} / 100</p>
+    <p>Felicidad: {{ mascota.felicidad }} / 100</p>
+
+    {% if mascota.esta_bien %}
+        <p>Estado: 😊 feliz y sana</p>
+    {% else %}
+        <p>Estado: 😟 necesita atencion</p>
+    {% endif %}
+
+    <form action="{% url 'alimentar_mascota' mascota.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit">🍖 Alimentar</button>
+    </form>
+
+    <form action="{% url 'jugar_mascota' mascota.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit">🎾 Jugar</button>
+    </form>
+
+    <p><a href="{% url 'listar_items' mascota.id %}">🛒 Ir a la tienda</a></p>
+    <p><a href="{% url 'ver_curiosidades' mascota.id %}">🧠 Ver curiosidades</a></p>
+    <p><a href="{% url 'preguntar_ia' mascota.id %}">🤖 Preguntarle a la IA</a></p>
+</body>
+</html>

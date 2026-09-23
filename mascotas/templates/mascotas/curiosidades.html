@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Curiosidades de {{ mascota.nombre }}</title>
+</head>
+<body>
+    <p><a href="{% url 'detalle_mascota' mascota.id %}">&larr; volver a {{ mascota.nombre }}</a></p>
+    <h1>🧠 Curiosidades sobre {{ mascota.get_especie_display }}</h1>
+    <p><small>Estos datos vienen de un microservicio propio en Node.js
+       (desplegado en Render) que consulta una base de datos PostgreSQL en Neon.</small></p>
+
+    {% if error %}
+        <p>⚠️ {{ error }}</p>
+        <p>(Si estas corriendo esto en local, asegurate de tener el microservicio
+        levantado en <code>MICROSERVICIO_URL</code>, por defecto <code>http://localhost:3000</code>.)</p>
+    {% elif curiosidades %}
+        <ul>
+        {% for c in curiosidades %}
+            <li>{{ c.texto }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay curiosidades cargadas para esta especie todavia.</p>
+    {% endif %}
+</body>
+</html>
