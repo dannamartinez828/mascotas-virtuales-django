@@ -21,12 +21,33 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-c%&*#%99$g=e)+8b+s4b^bo1#aa#p2!52zfz_7kx_4@$9wi=rg'
+# En local usa la key de siempre; en Render se define SECRET_KEY como
+# variable de entorno con un valor real y secreto.
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-c%&*#%99$g=e)+8b+s4b^bo1#aa#p2!52zfz_7kx_4@$9wi=rg',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# En Render se define DJANGO_DEBUG=False como variable de entorno.
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+# admite cualquier subdominio *.onrender.com automaticamente (no hay que
+# escribir la URL exacta a mano), mas lo que se agregue por variable de entorno
+ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1']
+extra_hosts = os.environ.get('ALLOWED_HOSTS', '')
+if extra_hosts:
+    ALLOWED_HOSTS += [h.strip() for h in extra_hosts.split(',') if h.strip()]
+
+# necesario porque Render sirve la app detras de un proxy https
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+
+# seguridad basica cuando corre en produccion (Render siempre sirve por https)
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
@@ -44,6 +65,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # sirve los archivos estaticos en produccion (admin, etc)
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -74,12 +96,20 @@ WSGI_APPLICATION = 'gestor_mascotas.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
+#
+# En local (sin DATABASE_URL definida) usa SQLite, igual que antes.
+# En Render se define DATABASE_URL con el connection string de un proyecto
+# de Neon (PostgreSQL) para que los datos NO se borren cada vez que Render
+# reinicia el servicio (el disco de Render es temporal, un archivo sqlite3
+# ahi se perderia).
+
+import dj_database_url
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+    )
 }
 
 
@@ -118,6 +148,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # aqui junta collectstatic los archivos para produccion
+STORAGES = {
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 
 # URL del microservicio de curiosidades (Node.js + Neon), desplegado en Render.
 # En local usa localhost:3000; en produccion se define con la variable de entorno.

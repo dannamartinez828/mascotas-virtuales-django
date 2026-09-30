@@ -3,15 +3,7 @@ from django.conf import settings
 import random
 import requests
 from .models import Mascota, ESPECIES
-from gestor_mascotas.microservicio_client import (
-    obtener_monedas,
-    ganar_monedas,
-    listar_curiosidades,
-    obtener_curiosidad,
-    crear_curiosidad,
-    editar_curiosidad,
-    eliminar_curiosidad,
-)
+from gestor_mascotas.microservicio_client import obtener_monedas, ganar_monedas
 
 OPCIONES_JUEGO = ('piedra', 'papel', 'tijera')
 GANA_A = {'piedra': 'tijera', 'papel': 'piedra', 'tijera': 'papel'}
@@ -250,70 +242,3 @@ def jugar_minijuego(request, mascota_id):
         'error': error or error_monedas,
     }
     return render(request, 'mascotas/minijuego.html', context)
-
-
-# ---------------------------------------------------------------------------
-# CRUD de curiosidades. A diferencia del CRUD de Mascota (que vive en
-# SQLite), estas 4 vistas arman un formulario HTML y, al enviarlo, llaman al
-# microservicio para que este haga el INSERT/UPDATE/DELETE directamente
-# sobre la base de datos Neon. Django no guarda copia local de nada de esto.
-# ---------------------------------------------------------------------------
-
-def gestionar_curiosidades(request):
-    # READ del CRUD: lista todas las curiosidades tal como estan AHORA en Neon
-    curiosidades, error = listar_curiosidades()
-    context = {'curiosidades': curiosidades, 'error': error}
-    return render(request, 'mascotas/curiosidades_admin.html', context)
-
-
-def crear_curiosidad_view(request):
-    # CREATE del CRUD: INSERT en Neon
-    error = None
-    if request.method == 'POST':
-        especie = request.POST.get('especie')
-        texto = request.POST.get('texto', '').strip()
-        if not texto:
-            error = 'Escribe el texto de la curiosidad.'
-        else:
-            _creada, error = crear_curiosidad(especie, texto)
-            if not error:
-                return redirect('gestionar_curiosidades')
-
-    context = {'especies': ESPECIES, 'error': error}
-    return render(request, 'mascotas/curiosidad_form.html', context)
-
-
-def editar_curiosidad_view(request, curiosidad_id):
-    # UPDATE del CRUD: UPDATE en Neon sobre la fila con ese id
-    error = None
-    curiosidad, error_obtener = obtener_curiosidad(curiosidad_id)
-
-    if curiosidad is None:
-        return redirect('gestionar_curiosidades')
-
-    if request.method == 'POST':
-        especie = request.POST.get('especie')
-        texto = request.POST.get('texto', '').strip()
-        if not texto:
-            error = 'Escribe el texto de la curiosidad.'
-        else:
-            _actualizada, error = editar_curiosidad(curiosidad_id, especie, texto)
-            if not error:
-                return redirect('gestionar_curiosidades')
-            curiosidad['especie'] = especie
-            curiosidad['texto'] = texto
-
-    context = {
-        'curiosidad': curiosidad,
-        'especies': ESPECIES,
-        'error': error or error_obtener,
-    }
-    return render(request, 'mascotas/curiosidad_form.html', context)
-
-
-def eliminar_curiosidad_view(request, curiosidad_id):
-    # DELETE del CRUD: borra la fila en Neon. Solo por POST, igual que
-    # eliminar_mascota, para que no se pueda borrar abriendo el link (GET).
-    if request.method == 'POST':
-        eliminar_curiosidad(curiosidad_id)
-    return redirect('gestionar_curiosidades')

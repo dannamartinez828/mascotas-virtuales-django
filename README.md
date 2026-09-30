@@ -49,14 +49,7 @@ en `../microservicio/README.md`.
   Swagger en `/api-docs`.
 - CRUD completo de Mascota: Crear (`crear_mascota`), Leer (`listar_mascotas`,
   `detalle_mascota`), Actualizar (`editar_mascota`) y Eliminar
-  (`eliminar_mascota`), todo con formularios HTML. Este CRUD guarda en el
-  SQLite local de Django.
-- CRUD completo de Curiosidades (`gestionar_curiosidades`, `crear_curiosidad`,
-  `editar_curiosidad`, `eliminar_curiosidad`), tambien con formularios HTML,
-  pero este SI modifica la base de datos en la nube: cada Crear/Editar/
-  Eliminar llama al microservicio, que ejecuta el INSERT/UPDATE/DELETE
-  directamente sobre la tabla `curiosidades` en Neon. Se accede desde
-  "Administrar curiosidades" en la pagina principal.
+  (`eliminar_mascota`), todo con formularios HTML.
 
 ## IA externa (Groq, gratuita)
 
@@ -101,4 +94,67 @@ Si `MICROSERVICIO_URL` no esta definida, la app intenta contactar
 `http://localhost:3000` y, si no lo encuentra corriendo, la vista de
 curiosidades simplemente muestra un mensaje de error controlado (no se cae
 la app).
+
+## Publicar la app Django en Render (para que el link sea verificable)
+
+Se usa Render en vez de PythonAnywhere porque las cuentas gratis de
+PythonAnywhere solo pueden llamar a un numero limitado de sitios externos
+("whitelist"), lo que rompe las llamadas a Groq y al microservicio. Render
+no tiene esa restriccion y ya se usa para el microservicio.
+
+### 1. Crear una base de datos Postgres en Neon para Django
+
+Igual que el microservicio, pero un proyecto de Neon **separado** (para no
+mezclar las tablas de Django con las de `curiosidades`/`monedas`):
+
+1. Crear un proyecto nuevo en https://neon.tech.
+2. Copiar su **Connection string** (se usa en el paso 3).
+
+### 2. Subir la carpeta `app` a GitHub
+
+Igual que se hizo con el microservicio:
+```bash
+cd app
+git init
+git add .
+git commit -m "Primera version de la app Django"
+git branch -M main
+git remote add origin https://github.com/tu-usuario/mascotas-virtuales-django.git
+git push -u origin main
+```
+
+### 3. Crear el Web Service en Render
+
+1. En Render: **New +** → **Web Service** → elegir el repo
+   `mascotas-virtuales-django`.
+2. Configurar:
+
+| Campo | Valor |
+|---|---|
+| Runtime | Python |
+| Build Command | `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate` |
+| Start Command | `gunicorn gestor_mascotas.wsgi` |
+| Instance Type | Free |
+
+3. En **Environment Variables** agregar:
+
+| Key | Value |
+|---|---|
+| `SECRET_KEY` | cualquier texto largo y aleatorio (no uses el que trae el proyecto por defecto) |
+| `DJANGO_DEBUG` | `False` |
+| `DATABASE_URL` | el connection string de Neon del paso 1 |
+| `MICROSERVICIO_URL` | la URL del microservicio ya desplegado (ej. `https://microservicio-curiosidades.onrender.com`) |
+| `GROQ_API_KEY` | tu key de Groq |
+
+4. **Create Web Service**. Cuando termine, Render da una URL publica
+   (ej. `https://mascotas-virtuales.onrender.com`) — esa es la que se
+   comparte para que la verifiquen.
+
+Como `python manage.py migrate` esta en el Build Command, las tablas se
+crean solas en Neon la primera vez. Para tener datos de ejemplo (la
+mascota "Firu" y los items de la tienda), entrar una vez a
+`https://tu-app.onrender.com/admin/` (creando antes un superusuario con
+`python manage.py createsuperuser` desde el Shell de Render, pestaña
+"Shell" del servicio) o simplemente usar los formularios de la app para
+crearlos a mano.
 
