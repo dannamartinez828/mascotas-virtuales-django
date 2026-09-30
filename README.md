@@ -9,6 +9,17 @@ digital (alimentarla, jugar con ella y comprarle cosas en la tienda).
 - **mascotas**: crear mascotas, verlas, alimentarlas, jugar con ellas y ver curiosidades.
 - **tienda**: comprar items que suben la felicidad y bajan el hambre de una mascota.
 
+## Deterioro por tiempo
+
+Las mascotas no se quedan estáticas: si no interactúas con una, cada 10
+minutos sin tocarla le sube el hambre +5 y le baja la felicidad -3 (topes
+0-100). Esto se calcula solo, sin cron ni tareas en segundo plano — el
+modelo `Mascota` guarda `ultima_interaccion`, y cada vez que se carga una
+vista donde aparece esa mascota (listar, detalle, tienda) se llama
+`mascota.actualizar_por_tiempo()`, que revisa cuánto tiempo pasó y aplica
+el deterioro correspondiente antes de mostrarla. Alimentar, jugar o
+comprarle algo reinicia ese contador.
+
 ## Microservicio (Node.js + Neon)
 
 La vista `ver_curiosidades` (app mascotas) consume un microservicio propio,
@@ -31,7 +42,21 @@ en `../microservicio/README.md`.
 - Una vista (`ver_curiosidades`) consume un microservicio propio desplegado
   en la nube que a su vez consulta una base de datos en la nube (Neon).
 - Una vista (`preguntar_ia`) consulta una IA externa gratuita (Groq) para
-  responder preguntas sobre el cuidado de la mascota.
+  responder preguntas sobre el cuidado de la mascota, usando datos REALES
+  de la base de datos (hambre, felicidad, monedas e items de la tienda) en
+  vez de respuestas genericas.
+- El microservicio (`../microservicio/`) expone documentación interactiva
+  Swagger en `/api-docs`.
+- CRUD completo de Mascota: Crear (`crear_mascota`), Leer (`listar_mascotas`,
+  `detalle_mascota`), Actualizar (`editar_mascota`) y Eliminar
+  (`eliminar_mascota`), todo con formularios HTML. Este CRUD guarda en el
+  SQLite local de Django.
+- CRUD completo de Curiosidades (`gestionar_curiosidades`, `crear_curiosidad`,
+  `editar_curiosidad`, `eliminar_curiosidad`), tambien con formularios HTML,
+  pero este SI modifica la base de datos en la nube: cada Crear/Editar/
+  Eliminar llama al microservicio, que ejecuta el INSERT/UPDATE/DELETE
+  directamente sobre la tabla `curiosidades` en Neon. Se accede desde
+  "Administrar curiosidades" en la pagina principal.
 
 ## IA externa (Groq, gratuita)
 

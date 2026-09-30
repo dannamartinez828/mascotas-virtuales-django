@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar {{ mascota.nombre }}</title>
+</head>
+<body>
+    <p><a href="{% url 'detalle_mascota' mascota.id %}">&larr; volver a {{ mascota.nombre }}</a></p>
+    <h1>Editar mascota</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <label>Nombre: <input type="text" name="nombre" value="{{ mascota.nombre }}" required></label><br><br>
+        <label>Especie:
+            <select name="especie">
+                {% for valor, nombre in especies %}
+                    <option value="{{ valor }}" {% if valor == mascota.especie %}selected{% endif %}>{{ nombre }}</option>
+                {% endfor %}
+            </select>
+        </label><br><br>
+        <button type="submit">Guardar cambios</button>
+    </form>
+</body>
+</html>

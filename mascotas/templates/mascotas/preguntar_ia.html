@@ -8,7 +8,10 @@
     <p><a href="{% url 'detalle_mascota' mascota.id %}">&larr; volver a {{ mascota.nombre }}</a></p>
     <h1>🤖 Preguntale a la IA sobre el cuidado de {{ mascota.nombre }}</h1>
     <p><small>Usa Groq (IA externa gratuita) para responder dudas sobre el
-       cuidado de tu {{ mascota.get_especie_display }}.</small></p>
+       cuidado de tu {{ mascota.get_especie_display }}, usando el hambre,
+       felicidad, monedas e items de la tienda REALES de tu mascota (no son
+       datos inventados). Prueba preguntando algo como
+       "¿que me conviene comprarle en la tienda ahora mismo?".</small></p>
 
     <form method="post">
         {% csrf_token %}

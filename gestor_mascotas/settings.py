@@ -127,7 +127,7 @@ MICROSERVICIO_URL = os.environ.get('MICROSERVICIO_URL', 'http://localhost:3000')
 # Api compatible con el formato de chat completions de OpenAI.
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
 GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
-GROQ_MODEL = 'llama-3.1-8b-instant'
+GROQ_MODEL = 'openai/gpt-oss-20b'
 
 
 # Email

@@ -7,6 +7,7 @@
 <body>
     <h1>🐾 Mis Mascotas Virtuales</h1>
     <p><a href="{% url 'crear_mascota' %}">+ Adoptar una nueva mascota</a></p>
+    <p><a href="{% url 'gestionar_curiosidades' %}">🗂️ Administrar curiosidades (CRUD sobre Neon)</a></p>
 
     {% if mascotas %}
         <ul>
@@ -19,6 +20,12 @@
                 {% if not mascota.esta_bien %}
                     ⚠️ necesita atencion
                 {% endif %}
+                · <a href="{% url 'editar_mascota' mascota.id %}">editar</a>
+                · <form action="{% url 'eliminar_mascota' mascota.id %}" method="post" style="display:inline"
+                        onsubmit="return confirm('¿Eliminar a {{ mascota.nombre }}?');">
+                    {% csrf_token %}
+                    <button type="submit">eliminar</button>
+                </form>
             </li>
         {% endfor %}
         </ul>

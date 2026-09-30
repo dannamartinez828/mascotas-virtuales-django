@@ -2,15 +2,20 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="5">
     <title>{{ mascota.nombre }}</title>
 </head>
 <body>
     <p><a href="{% url 'listar_mascotas' %}">&larr; volver</a></p>
 
     <h1>{{ mascota.nombre }} ({{ mascota.get_especie_display }})</h1>
+    <p><small>Esta pagina se actualiza sola cada 5 segundos (util para la demo:
+       si no alimentas o juegas, el hambre va subiendo solo y la felicidad va bajando).</small></p>
 
     <p>Hambre: {{ mascota.hambre }} / 100</p>
     <p>Felicidad: {{ mascota.felicidad }} / 100</p>
+    <p>🪙 Monedas: {{ monedas }}</p>
+    {% if error_monedas %}<p><small>⚠️ {{ error_monedas }}</small></p>{% endif %}
 
     {% if mascota.esta_bien %}
         <p>Estado: 😊 feliz y sana</p>
@@ -28,8 +33,18 @@
         <button type="submit">🎾 Jugar</button>
     </form>
 
+    <p><a href="{% url 'jugar_minijuego' mascota.id %}">🎮 Jugar minijuego (ganar monedas)</a></p>
     <p><a href="{% url 'listar_items' mascota.id %}">🛒 Ir a la tienda</a></p>
+    <p><a href="{% url 'ver_inventario' mascota.id %}">🎒 Ver inventario</a></p>
     <p><a href="{% url 'ver_curiosidades' mascota.id %}">🧠 Ver curiosidades</a></p>
     <p><a href="{% url 'preguntar_ia' mascota.id %}">🤖 Preguntarle a la IA</a></p>
+
+    <hr>
+    <p><a href="{% url 'editar_mascota' mascota.id %}">✏️ Editar mascota</a></p>
+    <form action="{% url 'eliminar_mascota' mascota.id %}" method="post"
+          onsubmit="return confirm('¿Seguro que quieres eliminar a {{ mascota.nombre }}? Esto no se puede deshacer.');">
+        {% csrf_token %}
+        <button type="submit">🗑️ Eliminar mascota</button>
+    </form>
 </body>
 </html>

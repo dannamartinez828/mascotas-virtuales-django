@@ -7,6 +7,12 @@
 <body>
     <p><a href="{% url 'detalle_mascota' mascota.id %}">&larr; volver a {{ mascota.nombre }}</a></p>
     <h1>🛒 Tienda para {{ mascota.nombre }}</h1>
+    <p><strong>🪙 Monedas: {{ monedas }}</strong>
+       — <a href="{% url 'jugar_minijuego' mascota.id %}">ganar mas jugando</a></p>
+    {% if error %}<p>⚠️ {{ error }}</p>{% endif %}
+
+    <p><small>Lo que compres se guarda en tu <a href="{% url 'ver_inventario' mascota.id %}">inventario</a>,
+       no se usa automaticamente.</small></p>
 
     {% if items %}
         <ul>
@@ -14,9 +20,12 @@
             <li>
                 {{ item.emoji }} {{ item.nombre }}
                 (+{{ item.precio_felicidad }} felicidad, -{{ item.reduce_hambre }} hambre)
+                — costo: 🪙 {{ item.costo }}
                 <form action="{% url 'comprar_item' mascota.id item.id %}" method="post" style="display:inline">
                     {% csrf_token %}
-                    <button type="submit">Comprar</button>
+                    <button type="submit" {% if monedas < item.costo %}disabled{% endif %}>
+                        {% if monedas < item.costo %}Monedas insuficientes{% else %}Comprar{% endif %}
+                    </button>
                 </form>
             </li>
         {% endfor %}
