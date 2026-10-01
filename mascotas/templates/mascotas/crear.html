@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Adoptar mascota</title>
+</head>
+<body>
+    <p><a href="{% url 'listar_mascotas' %}">&larr; volver</a></p>
+    <h1>Adoptar una mascota nueva</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <label>Nombre: <input type="text" name="nombre" required></label><br><br>
+        <label>Especie:
+            <select name="especie">
+                {% for valor, nombre in especies %}
+                    <option value="{{ valor }}">{{ nombre }}</option>
+                {% endfor %}
+            </select>
+        </label><br><br>
+        <button type="submit">Adoptar</button>
+    </form>
+</body>
+</html>

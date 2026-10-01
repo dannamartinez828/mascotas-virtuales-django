@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Minijuego - {{ mascota.nombre }}</title>
+</head>
+<body>
+    <p><a href="{% url 'detalle_mascota' mascota.id %}">&larr; volver a {{ mascota.nombre }}</a></p>
+    <h1>🎮 Piedra, papel o tijera</h1>
+    <p>Gana monedas para gastar en la tienda. Ganar: +10 monedas. Empate: +2. Perder: +0.</p>
+
+    <p><strong>Monedas actuales: {{ monedas }}</strong></p>
+    {% if error %}<p>⚠️ {{ error }}</p>{% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="eleccion" value="piedra">🪨 Piedra</button>
+        <button type="submit" name="eleccion" value="papel">📄 Papel</button>
+        <button type="submit" name="eleccion" value="tijera">✂️ Tijera</button>
+    </form>
+
+    {% if resultado %}
+        <h3>
+            {% if resultado == 'ganaste' %}
+                🎉 ¡Ganaste! +{{ monedas_ganadas }} monedas
+            {% elif resultado == 'empate' %}
+                🤝 Empate. +{{ monedas_ganadas }} monedas
+            {% else %}
+                😅 Perdiste. +0 monedas
+            {% endif %}
+        </h3>
+        <p>La maquina eligio: {{ eleccion_pc }}</p>
+    {% endif %}
+</body>
+</html>

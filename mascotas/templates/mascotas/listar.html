@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Mascotas Virtuales</title>
+</head>
+<body>
+    <h1>🐾 Mis Mascotas Virtuales</h1>
+    <p><a href="{% url 'crear_mascota' %}">+ Adoptar una nueva mascota</a></p>
+<p><strong>Consulta de datos:</strong> {{ fuente_consulta }}</p>
+{% if error_consulta %}<p>⚠️ {{ error_consulta }}</p>{% endif %}
+
+    {% if mascotas %}
+        <ul>
+        {% for mascota in mascotas %}
+            <li>
+                <a href="{% url 'detalle_mascota' mascota.id %}">
+                    {{ mascota.nombre }} - {{ mascota.get_especie_display }}
+                </a>
+                (hambre: {{ mascota.hambre }}, felicidad: {{ mascota.felicidad }})
+                {% if not mascota.esta_bien %}
+                    ⚠️ necesita atencion
+                {% endif %}
+                · <a href="{% url 'editar_mascota' mascota.id %}">editar</a>
+                · <form action="{% url 'eliminar_mascota' mascota.id %}" method="post" style="display:inline"
+                        onsubmit="return confirm('¿Eliminar a {{ mascota.nombre }}?');">
+                    {% csrf_token %}
+                    <button type="submit">eliminar</button>
+                </form>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Todavia no tienes mascotas. ¡Adopta una!</p>
+    {% endif %}
+</body>
+</html>

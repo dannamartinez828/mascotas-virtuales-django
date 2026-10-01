@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if curiosidad %}Editar{% else %}Nueva{% endif %} curiosidad</title>
+</head>
+<body>
+    <p><a href="{% url 'gestionar_curiosidades' %}">&larr; volver</a></p>
+    <h1>{% if curiosidad %}Editar curiosidad{% else %}Nueva curiosidad{% endif %}</h1>
+    <p><small>{% if curiosidad %}Al guardar se ejecuta un UPDATE{% else %}Al guardar se ejecuta un INSERT{% endif %}
+       sobre la tabla <code>curiosidades</code> en Neon.</small></p>
+
+    {% if error %}
+        <p>⚠️ {{ error }}</p>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <label>Especie:
+            <select name="especie">
+                {% for valor, nombre in especies %}
+                    <option value="{{ valor }}" {% if curiosidad.especie == valor %}selected{% endif %}>{{ nombre }}</option>
+                {% endfor %}
+            </select>
+        </label><br><br>
+        <label>Texto:<br>
+            <textarea name="texto" rows="3" cols="50" required>{{ curiosidad.texto }}</textarea>
+        </label><br><br>
+        <button type="submit">Guardar en Neon</button>
+    </form>
+</body>
+</html>
