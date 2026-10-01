@@ -11,9 +11,15 @@ ESPECIES = (
 # cada cuantos SEGUNDOS sin interactuar se le sube el hambre / baja la felicidad.
 # pensado para que en una demo en vivo se note el cambio en unos 15-20 segundos,
 # sin que sea tan rapido que se vea descontrolado.
+<<<<<<< HEAD
 SEGUNDOS_POR_CICLO = 10
 HAMBRE_POR_CICLO = 7
 FELICIDAD_POR_CICLO = 5
+=======
+SEGUNDOS_POR_CICLO = 15
+HAMBRE_POR_CICLO = 4
+FELICIDAD_POR_CICLO = 3
+>>>>>>> 67e04a29ca1c5064599473b122e60bcb1cfff31a
 
 
 class Mascota(models.Model):

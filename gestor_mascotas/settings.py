@@ -158,6 +158,7 @@ STORAGES = {
 # URL del microservicio de curiosidades (Node.js + Neon), desplegado en Render.
 # En local usa localhost:3000; en produccion se define con la variable de entorno.
 MICROSERVICIO_URL = os.environ.get('MICROSERVICIO_URL', 'http://localhost:3000')
+<<<<<<< HEAD
 # CRUD y consulta resiliente: en Render se configuran las URLs de servicios independientes.
 CRUD_INSERTAR_URL = os.environ.get('CRUD_INSERTAR_URL', '')
 CRUD_ACTUALIZAR_URL = os.environ.get('CRUD_ACTUALIZAR_URL', '')
@@ -165,6 +166,8 @@ CRUD_ELIMINAR_URL = os.environ.get('CRUD_ELIMINAR_URL', '')
 CONSULTA_PYTHON_URL = os.environ.get('CONSULTA_PYTHON_URL', '')
 CONSULTA_NODE_URL = os.environ.get('CONSULTA_NODE_URL', '')
 
+=======
+>>>>>>> 67e04a29ca1c5064599473b122e60bcb1cfff31a
 
 # IA externa gratuita (Groq: https://console.groq.com, tiene capa gratuita).
 # Api compatible con el formato de chat completions de OpenAI.

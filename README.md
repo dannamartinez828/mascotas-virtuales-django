@@ -102,6 +102,7 @@ PythonAnywhere solo pueden llamar a un numero limitado de sitios externos
 ("whitelist"), lo que rompe las llamadas a Groq y al microservicio. Render
 no tiene esa restriccion y ya se usa para el microservicio.
 
+<<<<<<< HEAD
 ### 1. Reusar la misma base de datos de Neon del microservicio
 
 No hace falta crear un proyecto de Neon nuevo: Django va a crear sus
@@ -112,6 +113,15 @@ propias tablas (`mascotas_mascota`, `tienda_item`, etc.) dentro de la
 Solo se reusa el mismo **Connection string** de Neon que ya usaste en el
 `.env` del microservicio (dashboard de Neon → Connection Details). Se
 usa tal cual en el paso 3.
+=======
+### 1. Crear una base de datos Postgres en Neon para Django
+
+Igual que el microservicio, pero un proyecto de Neon **separado** (para no
+mezclar las tablas de Django con las de `curiosidades`/`monedas`):
+
+1. Crear un proyecto nuevo en https://neon.tech.
+2. Copiar su **Connection string** (se usa en el paso 3).
+>>>>>>> 67e04a29ca1c5064599473b122e60bcb1cfff31a
 
 ### 2. Subir la carpeta `app` a GitHub
 
@@ -145,7 +155,11 @@ git push -u origin main
 |---|---|
 | `SECRET_KEY` | cualquier texto largo y aleatorio (no uses el que trae el proyecto por defecto) |
 | `DJANGO_DEBUG` | `False` |
+<<<<<<< HEAD
 | `DATABASE_URL` | el mismo connection string de Neon que usa el microservicio |
+=======
+| `DATABASE_URL` | el connection string de Neon del paso 1 |
+>>>>>>> 67e04a29ca1c5064599473b122e60bcb1cfff31a
 | `MICROSERVICIO_URL` | la URL del microservicio ya desplegado (ej. `https://microservicio-curiosidades.onrender.com`) |
 | `GROQ_API_KEY` | tu key de Groq |
 

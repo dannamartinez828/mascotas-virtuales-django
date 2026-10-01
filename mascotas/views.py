@@ -3,16 +3,21 @@ from django.conf import settings
 import random
 import requests
 from .models import Mascota, ESPECIES
+<<<<<<< HEAD
 from gestor_mascotas.microservicio_client import (
     obtener_monedas, ganar_monedas, gastar_monedas,
     obtener_mascotas_resiliente, crear_mascota_api,
     actualizar_mascota_api, eliminar_mascota_api,
 )
+=======
+from gestor_mascotas.microservicio_client import obtener_monedas, ganar_monedas
+>>>>>>> 67e04a29ca1c5064599473b122e60bcb1cfff31a
 
 OPCIONES_JUEGO = ('piedra', 'papel', 'tijera')
 GANA_A = {'piedra': 'tijera', 'papel': 'piedra', 'tijera': 'papel'}
 
 
+<<<<<<< HEAD
 class MascotaConsulta:
     def __init__(self, data):
         self.id=data.get('id')
@@ -35,6 +40,13 @@ def listar_mascotas(request):
             mascota.actualizar_por_tiempo()
         fuente='Django/BD local'
     return render(request, 'mascotas/listar.html', {'mascotas':mascotas,'fuente_consulta':fuente,'error_consulta':error})
+=======
+def listar_mascotas(request):
+    mascotas = Mascota.objects.all()
+    for mascota in mascotas:
+        mascota.actualizar_por_tiempo()  # si paso tiempo, le baja la felicidad/sube el hambre
+    return render(request, 'mascotas/listar.html', {'mascotas': mascotas})
+>>>>>>> 67e04a29ca1c5064599473b122e60bcb1cfff31a
 
 
 def detalle_mascota(request, mascota_id):
@@ -47,6 +59,7 @@ def detalle_mascota(request, mascota_id):
 
 def crear_mascota(request):
     if request.method == 'POST':
+<<<<<<< HEAD
         nombre=request.POST.get('nombre','').strip()
         especie=request.POST.get('especie')
         if nombre:
@@ -59,6 +72,14 @@ def crear_mascota(request):
                 Mascota.objects.create(nombre=nombre,especie=especie)
                 return redirect('listar_mascotas')
     return render(request,'mascotas/crear.html',{'especies':ESPECIES})
+=======
+        nombre = request.POST.get('nombre')
+        especie = request.POST.get('especie')
+        if nombre:
+            Mascota.objects.create(nombre=nombre, especie=especie)
+            return redirect('listar_mascotas')
+    return render(request, 'mascotas/crear.html', {'especies': ESPECIES})
+>>>>>>> 67e04a29ca1c5064599473b122e60bcb1cfff31a
 
 
 def editar_mascota(request, mascota_id):
@@ -69,6 +90,7 @@ def editar_mascota(request, mascota_id):
         nombre = request.POST.get('nombre', '').strip()
         especie = request.POST.get('especie')
         if nombre:
+<<<<<<< HEAD
             try:
                 if actualizar_mascota_api(mascota.id,nombre,especie,mascota.hambre,mascota.felicidad) is None:
                     mascota.nombre=nombre; mascota.especie=especie; mascota.save()
@@ -76,6 +98,12 @@ def editar_mascota(request, mascota_id):
             except requests.RequestException:
                 mascota.nombre=nombre; mascota.especie=especie; mascota.save()
                 return redirect('detalle_mascota', mascota_id=mascota.id)
+=======
+            mascota.nombre = nombre
+            mascota.especie = especie
+            mascota.save()
+            return redirect('detalle_mascota', mascota_id=mascota.id)
+>>>>>>> 67e04a29ca1c5064599473b122e60bcb1cfff31a
 
     context = {'mascota': mascota, 'especies': ESPECIES}
     return render(request, 'mascotas/editar.html', context)
@@ -87,11 +115,15 @@ def eliminar_mascota(request, mascota_id):
     # para que no se pueda borrar por accidente abriendo el link (GET).
     mascota = get_object_or_404(Mascota, id=mascota_id)
     if request.method == 'POST':
+<<<<<<< HEAD
         try:
             if eliminar_mascota_api(mascota.id) is None:
                 mascota.delete()
         except requests.RequestException:
             mascota.delete()
+=======
+        mascota.delete()
+>>>>>>> 67e04a29ca1c5064599473b122e60bcb1cfff31a
         return redirect('listar_mascotas')
     return redirect('detalle_mascota', mascota_id=mascota.id)
 
