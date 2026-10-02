@@ -9,7 +9,14 @@
     <h1>🗂️ Administrar curiosidades (Neon)</h1>
     <p><small>Estas curiosidades viven en la base de datos PostgreSQL de Neon, no en el
        SQLite de Django. Crear, editar o eliminar aqui modifica esa base de datos en
-       tiempo real, a traves del microservicio.</small></p>
+       tiempo real, a traves de microservicios. Para cada operacion puedes elegir si la
+       ejecuta el microservicio en Python o el de Node.js.</small></p>
+
+    {% if messages %}
+        {% for m in messages %}
+            <p>{% if m.tags == 'error' %}⚠️{% else %}✅{% endif %} {{ m }}</p>
+        {% endfor %}
+    {% endif %}
 
     <p><a href="{% url 'crear_curiosidad' %}">+ Nueva curiosidad</a></p>
 
@@ -24,7 +31,8 @@
                 · <form action="{% url 'eliminar_curiosidad' c.id %}" method="post" style="display:inline"
                         onsubmit="return confirm('¿Eliminar esta curiosidad de Neon?');">
                     {% csrf_token %}
-                    <button type="submit">eliminar</button>
+                    <button type="submit" name="via" value="python">eliminar con Python 🐍</button>
+                    <button type="submit" name="via" value="node">eliminar con Node 🟩</button>
                 </form>
             </li>
         {% endfor %}

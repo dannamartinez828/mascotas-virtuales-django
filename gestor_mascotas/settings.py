@@ -166,6 +166,12 @@ MS_INSERTAR_URL = os.environ.get('MS_INSERTAR_URL', 'http://localhost:5001')
 MS_ACTUALIZAR_URL = os.environ.get('MS_ACTUALIZAR_URL', 'http://localhost:5002')
 MS_ELIMINAR_URL = os.environ.get('MS_ELIMINAR_URL', 'http://localhost:5003')
 
+# Microservicios en Node.js (Express + Neon): hacen las mismas 3 operaciones que
+# los de Python. En la app el usuario elige con cual lenguaje ejecutar cada una.
+NODE_INSERTAR_URL = os.environ.get('NODE_INSERTAR_URL', 'http://localhost:4001')
+NODE_ACTUALIZAR_URL = os.environ.get('NODE_ACTUALIZAR_URL', 'http://localhost:4002')
+NODE_ELIMINAR_URL = os.environ.get('NODE_ELIMINAR_URL', 'http://localhost:4003')
+
 # IA externa gratuita (Groq: https://console.groq.com, tiene capa gratuita).
 # Api compatible con el formato de chat completions de OpenAI.
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')

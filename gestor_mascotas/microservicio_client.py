@@ -75,11 +75,28 @@ def listar_curiosidades():
         return [], f"No se pudo consultar las curiosidades: {_error_de(e)}"
 
 
-def insertar_curiosidad(especie, texto):
-    """Microservicio Python de INSERCION. Devuelve (curiosidad, error)."""
+def _url_escritura(operacion, via):
+    """URL base del microservicio que ejecuta la operacion, segun el lenguaje elegido."""
+    if via == 'node':
+        urls = {
+            'insertar': settings.NODE_INSERTAR_URL,
+            'actualizar': settings.NODE_ACTUALIZAR_URL,
+            'eliminar': settings.NODE_ELIMINAR_URL,
+        }
+    else:
+        urls = {
+            'insertar': settings.MS_INSERTAR_URL,
+            'actualizar': settings.MS_ACTUALIZAR_URL,
+            'eliminar': settings.MS_ELIMINAR_URL,
+        }
+    return urls[operacion]
+
+
+def insertar_curiosidad(especie, texto, via='python'):
+    """Microservicio de INSERCION (via='python' o 'node'). Devuelve (curiosidad, error)."""
     try:
         resp = requests.post(
-            f"{settings.MS_INSERTAR_URL}/api/curiosidades",
+            f"{_url_escritura('insertar', via)}/api/curiosidades",
             json={'especie': especie, 'texto': texto},
             timeout=TIMEOUT_ESCRITURA,
         )
@@ -89,11 +106,11 @@ def insertar_curiosidad(especie, texto):
         return None, f"No se pudo insertar: {_error_de(e)}"
 
 
-def actualizar_curiosidad(curiosidad_id, especie, texto):
-    """Microservicio Python de ACTUALIZACION. Devuelve (curiosidad, error)."""
+def actualizar_curiosidad(curiosidad_id, especie, texto, via='python'):
+    """Microservicio de ACTUALIZACION (via='python' o 'node'). Devuelve (curiosidad, error)."""
     try:
         resp = requests.put(
-            f"{settings.MS_ACTUALIZAR_URL}/api/curiosidades/{curiosidad_id}",
+            f"{_url_escritura('actualizar', via)}/api/curiosidades/{curiosidad_id}",
             json={'especie': especie, 'texto': texto},
             timeout=TIMEOUT_ESCRITURA,
         )
@@ -103,11 +120,11 @@ def actualizar_curiosidad(curiosidad_id, especie, texto):
         return None, f"No se pudo actualizar: {_error_de(e)}"
 
 
-def eliminar_curiosidad(curiosidad_id):
-    """Microservicio Python de ELIMINACION. Devuelve (ok, error)."""
+def eliminar_curiosidad(curiosidad_id, via='python'):
+    """Microservicio de ELIMINACION (via='python' o 'node'). Devuelve (ok, error)."""
     try:
         resp = requests.delete(
-            f"{settings.MS_ELIMINAR_URL}/api/curiosidades/{curiosidad_id}",
+            f"{_url_escritura('eliminar', via)}/api/curiosidades/{curiosidad_id}",
             timeout=TIMEOUT_ESCRITURA,
         )
         resp.raise_for_status()

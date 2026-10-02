@@ -26,7 +26,13 @@
         <label>Texto:<br>
             <textarea name="texto" rows="3" cols="50" required>{{ curiosidad.texto }}</textarea>
         </label><br><br>
-        <button type="submit">Guardar en Neon</button>
+        {% if curiosidad %}
+            <button type="submit" name="via" value="python">Actualizar con Python 🐍</button>
+            <button type="submit" name="via" value="node">Actualizar con Node 🟩</button>
+        {% else %}
+            <button type="submit" name="via" value="python">Insertar con Python 🐍</button>
+            <button type="submit" name="via" value="node">Insertar con Node 🟩</button>
+        {% endif %}
     </form>
 </body>
 </html>

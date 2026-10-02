@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
+from django.contrib import messages
 import random
 import requests
 from .models import Mascota, ESPECIES
@@ -248,8 +249,16 @@ def jugar_minijuego(request, mascota_id):
 
 
 # ---------- Administrar curiosidades (CRUD sobre Neon via microservicios) ----------
-# Leer: microservicio Node. Insertar / actualizar / eliminar: un microservicio
-# Python distinto para cada operacion.
+# Leer: microservicio Node. Insertar / actualizar / eliminar: el usuario elige
+# con que lenguaje se ejecuta cada operacion (boton "con Python" o "con Node").
+
+NOMBRE_VIA = {'python': 'Python', 'node': 'Node.js'}
+
+
+def _via(request):
+    """Lenguaje elegido por el usuario en el boton que presiono."""
+    return 'node' if request.POST.get('via') == 'node' else 'python'
+
 
 def gestionar_curiosidades(request):
     curiosidades, error = listar_curiosidades()
@@ -262,9 +271,11 @@ def crear_curiosidad(request):
     if request.method == 'POST':
         especie = request.POST.get('especie')
         texto = request.POST.get('texto', '').strip()
+        via = _via(request)
         if texto:
-            _, error = insertar_curiosidad(especie, texto)
+            _, error = insertar_curiosidad(especie, texto, via)
             if not error:
+                messages.success(request, f"Curiosidad insertada con el microservicio de {NOMBRE_VIA[via]}.")
                 return redirect('gestionar_curiosidades')
     return render(request, 'mascotas/curiosidad_form.html', {'especies': ESPECIES, 'error': error})
 
@@ -276,10 +287,12 @@ def editar_curiosidad(request, curiosidad_id):
     if request.method == 'POST':
         especie = request.POST.get('especie')
         texto = request.POST.get('texto', '').strip()
+        via = _via(request)
         curiosidad = {'id': curiosidad_id, 'especie': especie, 'texto': texto}
         if texto:
-            _, error = actualizar_curiosidad(curiosidad_id, especie, texto)
+            _, error = actualizar_curiosidad(curiosidad_id, especie, texto, via)
             if not error:
+                messages.success(request, f"Curiosidad actualizada con el microservicio de {NOMBRE_VIA[via]}.")
                 return redirect('gestionar_curiosidades')
     else:
         lista, error = listar_curiosidades()
@@ -294,5 +307,10 @@ def editar_curiosidad(request, curiosidad_id):
 def eliminar_curiosidad_vista(request, curiosidad_id):
     # solo por POST, igual que eliminar_mascota
     if request.method == 'POST':
-        eliminar_curiosidad(curiosidad_id)
+        via = _via(request)
+        ok, error = eliminar_curiosidad(curiosidad_id, via)
+        if ok:
+            messages.success(request, f"Curiosidad eliminada con el microservicio de {NOMBRE_VIA[via]}.")
+        else:
+            messages.error(request, error)
     return redirect('gestionar_curiosidades')
