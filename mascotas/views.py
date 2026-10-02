@@ -250,9 +250,9 @@ def jugar_minijuego(request, mascota_id):
 
 # ---------- Administrar curiosidades (CRUD sobre Neon via microservicios) ----------
 # Leer: microservicio Node. Insertar / actualizar / eliminar: el usuario elige
-# con que lenguaje se ejecuta cada operacion (boton "con Python", "con Node" o "con Java").
+# con que lenguaje se ejecuta cada operacion (boton "con Python", "con Node", "con Java" o "con Go").
 
-NOMBRE_VIA = {'python': 'Python', 'node': 'Node.js', 'java': 'Java'}
+NOMBRE_VIA = {'python': 'Python', 'node': 'Node.js', 'java': 'Java', 'go': 'Go'}
 
 
 def _via(request):

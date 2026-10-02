@@ -178,6 +178,12 @@ JAVA_INSERTAR_URL = os.environ.get('JAVA_INSERTAR_URL', 'http://localhost:6001')
 JAVA_ACTUALIZAR_URL = os.environ.get('JAVA_ACTUALIZAR_URL', 'http://localhost:6002')
 JAVA_ELIMINAR_URL = os.environ.get('JAVA_ELIMINAR_URL', 'http://localhost:6003')
 
+# Microservicios en Go (net/http + Neon): mismas 3 operaciones. Son el cuarto
+# boton ("con Go") de cada operacion en la app.
+GO_INSERTAR_URL = os.environ.get('GO_INSERTAR_URL', 'http://localhost:7001')
+GO_ACTUALIZAR_URL = os.environ.get('GO_ACTUALIZAR_URL', 'http://localhost:7002')
+GO_ELIMINAR_URL = os.environ.get('GO_ELIMINAR_URL', 'http://localhost:7003')
+
 # IA externa gratuita (Groq: https://console.groq.com, tiene capa gratuita).
 # Api compatible con el formato de chat completions de OpenAI.
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
