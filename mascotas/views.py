@@ -3,7 +3,10 @@ from django.conf import settings
 import random
 import requests
 from .models import Mascota, ESPECIES
-from gestor_mascotas.microservicio_client import obtener_monedas, ganar_monedas
+from gestor_mascotas.microservicio_client import (
+    obtener_monedas, ganar_monedas,
+    listar_curiosidades, insertar_curiosidad, actualizar_curiosidad, eliminar_curiosidad,
+)
 
 OPCIONES_JUEGO = ('piedra', 'papel', 'tijera')
 GANA_A = {'piedra': 'tijera', 'papel': 'piedra', 'tijera': 'papel'}
@@ -242,3 +245,54 @@ def jugar_minijuego(request, mascota_id):
         'error': error or error_monedas,
     }
     return render(request, 'mascotas/minijuego.html', context)
+
+
+# ---------- Administrar curiosidades (CRUD sobre Neon via microservicios) ----------
+# Leer: microservicio Node. Insertar / actualizar / eliminar: un microservicio
+# Python distinto para cada operacion.
+
+def gestionar_curiosidades(request):
+    curiosidades, error = listar_curiosidades()
+    return render(request, 'mascotas/curiosidades_admin.html',
+                  {'curiosidades': curiosidades, 'error': error})
+
+
+def crear_curiosidad(request):
+    error = None
+    if request.method == 'POST':
+        especie = request.POST.get('especie')
+        texto = request.POST.get('texto', '').strip()
+        if texto:
+            _, error = insertar_curiosidad(especie, texto)
+            if not error:
+                return redirect('gestionar_curiosidades')
+    return render(request, 'mascotas/curiosidad_form.html', {'especies': ESPECIES, 'error': error})
+
+
+def editar_curiosidad(request, curiosidad_id):
+    error = None
+    curiosidad = None
+
+    if request.method == 'POST':
+        especie = request.POST.get('especie')
+        texto = request.POST.get('texto', '').strip()
+        curiosidad = {'id': curiosidad_id, 'especie': especie, 'texto': texto}
+        if texto:
+            _, error = actualizar_curiosidad(curiosidad_id, especie, texto)
+            if not error:
+                return redirect('gestionar_curiosidades')
+    else:
+        lista, error = listar_curiosidades()
+        curiosidad = next((c for c in lista if c['id'] == curiosidad_id), None)
+        if curiosidad is None and not error:
+            return redirect('gestionar_curiosidades')
+
+    return render(request, 'mascotas/curiosidad_form.html',
+                  {'curiosidad': curiosidad, 'especies': ESPECIES, 'error': error})
+
+
+def eliminar_curiosidad_vista(request, curiosidad_id):
+    # solo por POST, igual que eliminar_mascota
+    if request.method == 'POST':
+        eliminar_curiosidad(curiosidad_id)
+    return redirect('gestionar_curiosidades')

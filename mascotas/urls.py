@@ -12,4 +12,8 @@ urlpatterns = [
     path('<int:mascota_id>/curiosidades/', views.ver_curiosidades, name='ver_curiosidades'),
     path('<int:mascota_id>/preguntar-ia/', views.preguntar_ia, name='preguntar_ia'),
     path('<int:mascota_id>/minijuego/', views.jugar_minijuego, name='jugar_minijuego'),
+    path('curiosidades/', views.gestionar_curiosidades, name='gestionar_curiosidades'),
+    path('curiosidades/crear/', views.crear_curiosidad, name='crear_curiosidad'),
+    path('curiosidades/<int:curiosidad_id>/editar/', views.editar_curiosidad, name='editar_curiosidad'),
+    path('curiosidades/<int:curiosidad_id>/eliminar/', views.eliminar_curiosidad_vista, name='eliminar_curiosidad'),
 ]

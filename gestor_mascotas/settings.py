@@ -159,6 +159,13 @@ STORAGES = {
 # En local usa localhost:3000; en produccion se define con la variable de entorno.
 MICROSERVICIO_URL = os.environ.get('MICROSERVICIO_URL', 'http://localhost:3000')
 
+# Microservicios en Python (Flask + Neon) que escriben en la tabla curiosidades:
+# uno por operacion. En local corren en los puertos 5001/5002/5003; en
+# produccion se definen estas variables con las URLs de Render.
+MS_INSERTAR_URL = os.environ.get('MS_INSERTAR_URL', 'http://localhost:5001')
+MS_ACTUALIZAR_URL = os.environ.get('MS_ACTUALIZAR_URL', 'http://localhost:5002')
+MS_ELIMINAR_URL = os.environ.get('MS_ELIMINAR_URL', 'http://localhost:5003')
+
 # IA externa gratuita (Groq: https://console.groq.com, tiene capa gratuita).
 # Api compatible con el formato de chat completions de OpenAI.
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
