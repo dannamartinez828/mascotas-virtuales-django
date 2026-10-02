@@ -83,6 +83,12 @@ def _url_escritura(operacion, via):
             'actualizar': settings.NODE_ACTUALIZAR_URL,
             'eliminar': settings.NODE_ELIMINAR_URL,
         }
+    elif via == 'java':
+        urls = {
+            'insertar': settings.JAVA_INSERTAR_URL,
+            'actualizar': settings.JAVA_ACTUALIZAR_URL,
+            'eliminar': settings.JAVA_ELIMINAR_URL,
+        }
     else:
         urls = {
             'insertar': settings.MS_INSERTAR_URL,
@@ -93,7 +99,7 @@ def _url_escritura(operacion, via):
 
 
 def insertar_curiosidad(especie, texto, via='python'):
-    """Microservicio de INSERCION (via='python' o 'node'). Devuelve (curiosidad, error)."""
+    """Microservicio de INSERCION (via='python', 'node' o 'java'). Devuelve (curiosidad, error)."""
     try:
         resp = requests.post(
             f"{_url_escritura('insertar', via)}/api/curiosidades",
@@ -107,7 +113,7 @@ def insertar_curiosidad(especie, texto, via='python'):
 
 
 def actualizar_curiosidad(curiosidad_id, especie, texto, via='python'):
-    """Microservicio de ACTUALIZACION (via='python' o 'node'). Devuelve (curiosidad, error)."""
+    """Microservicio de ACTUALIZACION (via='python', 'node' o 'java'). Devuelve (curiosidad, error)."""
     try:
         resp = requests.put(
             f"{_url_escritura('actualizar', via)}/api/curiosidades/{curiosidad_id}",
@@ -121,7 +127,7 @@ def actualizar_curiosidad(curiosidad_id, especie, texto, via='python'):
 
 
 def eliminar_curiosidad(curiosidad_id, via='python'):
-    """Microservicio de ELIMINACION (via='python' o 'node'). Devuelve (ok, error)."""
+    """Microservicio de ELIMINACION (via='python', 'node' o 'java'). Devuelve (ok, error)."""
     try:
         resp = requests.delete(
             f"{_url_escritura('eliminar', via)}/api/curiosidades/{curiosidad_id}",

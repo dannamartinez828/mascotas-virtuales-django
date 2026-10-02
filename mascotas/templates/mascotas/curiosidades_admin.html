@@ -10,7 +10,7 @@
     <p><small>Estas curiosidades viven en la base de datos PostgreSQL de Neon, no en el
        SQLite de Django. Crear, editar o eliminar aqui modifica esa base de datos en
        tiempo real, a traves de microservicios. Para cada operacion puedes elegir si la
-       ejecuta el microservicio en Python o el de Node.js.</small></p>
+       ejecuta el microservicio en Python, en Node.js o en Java.</small></p>
 
     {% if messages %}
         {% for m in messages %}
@@ -33,6 +33,7 @@
                     {% csrf_token %}
                     <button type="submit" name="via" value="python">eliminar con Python 🐍</button>
                     <button type="submit" name="via" value="node">eliminar con Node 🟩</button>
+                    <button type="submit" name="via" value="java">eliminar con Java ☕</button>
                 </form>
             </li>
         {% endfor %}

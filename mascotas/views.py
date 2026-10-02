@@ -250,14 +250,15 @@ def jugar_minijuego(request, mascota_id):
 
 # ---------- Administrar curiosidades (CRUD sobre Neon via microservicios) ----------
 # Leer: microservicio Node. Insertar / actualizar / eliminar: el usuario elige
-# con que lenguaje se ejecuta cada operacion (boton "con Python" o "con Node").
+# con que lenguaje se ejecuta cada operacion (boton "con Python", "con Node" o "con Java").
 
-NOMBRE_VIA = {'python': 'Python', 'node': 'Node.js'}
+NOMBRE_VIA = {'python': 'Python', 'node': 'Node.js', 'java': 'Java'}
 
 
 def _via(request):
     """Lenguaje elegido por el usuario en el boton que presiono."""
-    return 'node' if request.POST.get('via') == 'node' else 'python'
+    via = request.POST.get('via')
+    return via if via in NOMBRE_VIA else 'python'
 
 
 def gestionar_curiosidades(request):
