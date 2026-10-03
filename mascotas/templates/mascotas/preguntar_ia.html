@@ -1,32 +1,58 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Preguntale a la IA sobre {{ mascota.nombre }}</title>
-</head>
-<body>
-    <p><a href="{% url 'detalle_mascota' mascota.id %}">&larr; volver a {{ mascota.nombre }}</a></p>
-    <h1>🤖 Preguntale a la IA sobre el cuidado de {{ mascota.nombre }}</h1>
-    <p><small>Usa Groq (IA externa gratuita) para responder dudas sobre el
-       cuidado de tu {{ mascota.get_especie_display }}, usando el hambre,
-       felicidad, monedas e items de la tienda REALES de tu mascota (no son
-       datos inventados). Prueba preguntando algo como
-       "¿que me conviene comprarle en la tienda ahora mismo?".</small></p>
+{% extends 'base.html' %}
+{% block title %}Pregúntale a la IA{% endblock %}
+{% block content %}
+<a class="volver" href="{% url 'detalle_mascota' mascota.id %}">← Volver a {{ mascota.nombre }}</a>
+<div class="card">
+    <div class="centro">
+        <span class="avatar">🤖</span>
+        <h1>Pregúntale a la IA sobre {{ mascota.nombre }}</h1>
+        <p class="sub">Responde con los datos reales de tu mascota: hambre, felicidad, monedas y lo que hay en la tienda.</p>
+    </div>
 
-    <form method="post">
+    <div class="chat">
+        {% if pregunta and not error or pregunta and respuesta %}
+            <div class="burbuja yo"><div class="quien">Tú</div>{{ pregunta }}</div>
+        {% endif %}
+        {% if respuesta %}
+            <div class="burbuja ia"><div class="quien">🤖 Asistente</div>{{ respuesta|linebreaksbr }}</div>
+        {% endif %}
+        {% if error %}
+            <div class="aviso aviso-warn"><span class="ico">😿</span><div>{{ error }}</div></div>
+        {% endif %}
+        <div class="burbuja ia" id="pensando" hidden><div class="quien">🤖 Asistente</div><span class="puntos"><span></span><span></span><span></span></span> pensando…</div>
+    </div>
+
+    <form method="post" data-carga="ia" id="form-ia">
         {% csrf_token %}
-        <textarea name="pregunta" rows="3" cols="50"
-            placeholder="Ej: ¿Cada cuanto deberia jugar con mi mascota?">{{ pregunta }}</textarea><br><br>
-        <button type="submit">Preguntar</button>
+        <label for="pregunta">Tu pregunta</label>
+        <textarea id="pregunta" name="pregunta" maxlength="{{ max_caracteres }}" rows="3" placeholder="Ej: ¿Qué me conviene comprarle ahora mismo?" required>{{ pregunta }}</textarea>
+        <div class="contador peque"><span id="cuenta">0</span> / {{ max_caracteres }}</div>
+        <div class="sugerencias">
+            <button class="sugerencia" type="button" data-q="¿Qué me conviene comprarle en la tienda ahora mismo?">🛒 ¿Qué le compro?</button>
+            <button class="sugerencia" type="button" data-q="¿Cómo está mi mascota hoy?">💖 ¿Cómo está?</button>
+            <button class="sugerencia" type="button" data-q="¿Cada cuánto debería jugar con mi mascota?">🎾 ¿Cada cuánto jugar?</button>
+        </div>
+        <div style="margin-top: 1rem">
+            <button class="btn btn-pri btn-block" type="submit" id="enviar" {% if espera %}data-espera="{{ espera }}"{% endif %}>✨ Preguntar</button>
+        </div>
+        <p class="peque centro">Para no saturar la IA, hay una pausa de unos segundos entre pregunta y pregunta.</p>
     </form>
-
-    {% if error %}
-        <p>⚠️ {{ error }}</p>
-    {% endif %}
-
-    {% if respuesta %}
-        <h3>Respuesta:</h3>
-        <p>{{ respuesta }}</p>
-    {% endif %}
-</body>
-</html>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+    var t = document.getElementById('pregunta'), c = document.getElementById('cuenta');
+    function contar() { c.textContent = t.value.length; }
+    t.addEventListener('input', contar); contar();
+    document.querySelectorAll('.sugerencia').forEach(function (b) {
+        b.addEventListener('click', function () { t.value = b.getAttribute('data-q'); contar(); t.focus(); });
+    });
+    // al enviar, aparece la burbuja con los puntitos saltarines
+    document.getElementById('form-ia').addEventListener('submit', function (e) {
+        if (e.defaultPrevented) return;
+        document.getElementById('pensando').hidden = false;
+    });
+})();
+</script>
+{% endblock %}

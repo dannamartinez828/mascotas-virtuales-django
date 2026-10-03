@@ -7,6 +7,7 @@ urlpatterns = [
     path('<int:mascota_id>/editar/', views.editar_mascota, name='editar_mascota'),
     path('<int:mascota_id>/eliminar/', views.eliminar_mascota, name='eliminar_mascota'),
     path('<int:mascota_id>/', views.detalle_mascota, name='detalle_mascota'),
+    path('<int:mascota_id>/estado/', views.estado_mascota, name='estado_mascota'),
     path('<int:mascota_id>/alimentar/', views.alimentar_mascota, name='alimentar_mascota'),
     path('<int:mascota_id>/jugar/', views.jugar_mascota, name='jugar_mascota'),
     path('<int:mascota_id>/curiosidades/', views.ver_curiosidades, name='ver_curiosidades'),

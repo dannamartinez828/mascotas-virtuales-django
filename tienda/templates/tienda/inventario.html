@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Inventario{% endblock %}
+{% block content %}
+<a class="volver" href="{% url 'detalle_mascota' mascota.id %}">← Volver a {{ mascota.nombre }}</a>
+<div class="cabecera">
+    <div>
+        <h1>🎒 Inventario de {{ mascota.nombre }}</h1>
+        <p class="sub">Usa un objeto para que {{ mascota.nombre }} reciba sus efectos.</p>
+    </div>
+    <a class="btn btn-sun btn-sm" href="{% url 'listar_items' mascota.id %}">🛒 Ir a la tienda</a>
+</div>
+
+{% if inventario %}
+<div class="grid">
+    {% for inv in inventario %}
+    <div class="card item" style="--i: {{ forloop.counter0 }}">
+        <span class="emoji">{{ inv.item.emoji }}</span>
+        <h2>{{ inv.item.nombre }}</h2>
+        <span class="cantidad">× {{ inv.cantidad }}</span>
+        <div class="efectos">
+            <span class="chip chip-pink">💖 +{{ inv.item.precio_felicidad }}</span>
+            <span class="chip chip-sun">🍖 −{{ inv.item.reduce_hambre }}</span>
+        </div>
+        <form action="{% url 'usar_item' mascota.id inv.item.id %}" method="post" data-carga="rapido" style="width:100%">
+            {% csrf_token %}<button class="btn btn-mint btn-block" type="submit">✨ Usar</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card vacio"><span class="avatar">🎒</span><h2>Tu mochila está vacía</h2><p class="sub">Compra algo en la tienda para empezar.</p>
+    <a class="btn btn-pri" href="{% url 'listar_items' mascota.id %}">🛒 Ir a la tienda</a></div>
+{% endif %}
+{% endblock %}

@@ -1,24 +1,27 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Editar {{ mascota.nombre }}</title>
-</head>
-<body>
-    <p><a href="{% url 'detalle_mascota' mascota.id %}">&larr; volver a {{ mascota.nombre }}</a></p>
-    <h1>Editar mascota</h1>
-
-    <form method="post">
+{% extends 'base.html' %}
+{% block title %}Editar {{ mascota.nombre }}{% endblock %}
+{% block content %}
+<a class="volver" href="{% url 'detalle_mascota' mascota.id %}">← Volver a {{ mascota.nombre }}</a>
+<div class="card formulario">
+    <div class="centro">
+        <span class="avatar">{{ mascota.emoji }}</span>
+        <h1>Editar mascota</h1>
+        <p class="sub">Cambia el nombre o la especie.</p>
+    </div>
+    <form method="post" data-carga="rapido">
         {% csrf_token %}
-        <label>Nombre: <input type="text" name="nombre" value="{{ mascota.nombre }}" required></label><br><br>
-        <label>Especie:
-            <select name="especie">
-                {% for valor, nombre in especies %}
-                    <option value="{{ valor }}" {% if valor == mascota.especie %}selected{% endif %}>{{ nombre }}</option>
-                {% endfor %}
-            </select>
-        </label><br><br>
-        <button type="submit">Guardar cambios</button>
+        <label for="nombre">Nombre</label>
+        <input id="nombre" type="text" name="nombre" maxlength="50" value="{{ mascota.nombre }}" required>
+
+        <label>Especie</label>
+        <div class="picker">
+            {% for valor, nombre, emoji in especies %}
+                <input type="radio" name="especie" id="esp-{{ valor }}" value="{{ valor }}" {% if valor == mascota.especie %}checked{% endif %}>
+                <label class="opt" for="esp-{{ valor }}"><span>{{ emoji }}</span>{{ nombre }}</label>
+            {% endfor %}
+        </div>
+
+        <div style="margin-top: 1.4rem"><button class="btn btn-pri btn-block" type="submit">💾 Guardar cambios</button></div>
     </form>
-</body>
-</html>
+</div>
+{% endblock %}

@@ -1,36 +1,49 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Mis Mascotas Virtuales</title>
-</head>
-<body>
-    <h1>🐾 Mis Mascotas Virtuales</h1>
-    <p><a href="{% url 'crear_mascota' %}">+ Adoptar una nueva mascota</a></p>
-    <p><a href="{% url 'gestionar_curiosidades' %}">🗂️ Administrar curiosidades</a></p>
+{% extends 'base.html' %}
+{% block title %}Mis mascotas{% endblock %}
+{% block content %}
+<div class="cabecera">
+    <div>
+        <h1>🐾 Mis mascotas</h1>
+        <p class="sub">Cuídalas, juega con ellas y no las dejes con hambre.</p>
+    </div>
+    <a class="btn btn-pri" href="{% url 'crear_mascota' %}">＋ Adoptar mascota</a>
+</div>
 
-    {% if mascotas %}
-        <ul>
-        {% for mascota in mascotas %}
-            <li>
-                <a href="{% url 'detalle_mascota' mascota.id %}">
-                    {{ mascota.nombre }} - {{ mascota.get_especie_display }}
-                </a>
-                (hambre: {{ mascota.hambre }}, felicidad: {{ mascota.felicidad }})
-                {% if not mascota.esta_bien %}
-                    ⚠️ necesita atencion
-                {% endif %}
-                · <a href="{% url 'editar_mascota' mascota.id %}">editar</a>
-                · <form action="{% url 'eliminar_mascota' mascota.id %}" method="post" style="display:inline"
-                        onsubmit="return confirm('¿Eliminar a {{ mascota.nombre }}?');">
-                    {% csrf_token %}
-                    <button type="submit">eliminar</button>
-                </form>
-            </li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>Todavia no tienes mascotas. ¡Adopta una!</p>
-    {% endif %}
-</body>
-</html>
+{% if mascotas %}
+<div class="grid">
+    {% for mascota in mascotas %}
+    <article class="card mascota {% if not mascota.esta_bien %}alerta triste{% endif %}" style="--i: {{ forloop.counter0 }}">
+        <a href="{% url 'detalle_mascota' mascota.id %}" style="text-decoration:none"><span class="avatar">{{ mascota.emoji }}</span></a>
+        <h2>{{ mascota.nombre }}</h2>
+        <div>
+            <span class="chip">{{ mascota.get_especie_display }}</span>
+            {% if not mascota.esta_bien %}<span class="chip chip-pink wiggle">⚠️ necesita atención</span>{% endif %}
+        </div>
+        <div class="medidor">
+            <div class="et"><span>🍖 Hambre</span><span>{{ mascota.hambre }}%</span></div>
+            <div class="barra hambre {% if mascota.hambre >= 70 %}alto{% endif %}"><i style="--w: {{ mascota.hambre }}%"></i></div>
+        </div>
+        <div class="medidor">
+            <div class="et"><span>💖 Felicidad</span><span>{{ mascota.felicidad }}%</span></div>
+            <div class="barra {% if mascota.felicidad <= 30 %}bajo{% endif %}"><i style="--w: {{ mascota.felicidad }}%"></i></div>
+        </div>
+        <div class="fila">
+            <a class="btn btn-pri btn-sm" href="{% url 'detalle_mascota' mascota.id %}">Ver</a>
+            <a class="btn btn-ghost btn-sm" href="{% url 'editar_mascota' mascota.id %}">Editar</a>
+            <form class="en-linea" action="{% url 'eliminar_mascota' mascota.id %}" method="post" data-confirm="¿Eliminar a {{ mascota.nombre }}? Esto no se puede deshacer.">
+                {% csrf_token %}
+                <button class="btn btn-danger btn-sm" type="submit">Eliminar</button>
+            </form>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card vacio">
+    <span class="avatar">🥚</span>
+    <h2>Todavía no tienes mascotas</h2>
+    <p class="sub">¡Adopta a tu primer compañero!</p>
+    <a class="btn btn-pri" href="{% url 'crear_mascota' %}">＋ Adoptar mascota</a>
+</div>
+{% endif %}
+{% endblock %}

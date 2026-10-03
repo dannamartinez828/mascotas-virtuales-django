@@ -1,50 +1,86 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="5">
-    <title>{{ mascota.nombre }}</title>
-</head>
-<body>
-    <p><a href="{% url 'listar_mascotas' %}">&larr; volver</a></p>
+{% extends 'base.html' %}
+{% block title %}{{ mascota.nombre }}{% endblock %}
+{% block content %}
+<a class="volver" href="{% url 'listar_mascotas' %}">← Mis mascotas</a>
 
-    <h1>{{ mascota.nombre }} ({{ mascota.get_especie_display }})</h1>
-    <p><small>Esta pagina se actualiza sola cada 5 segundos (util para la demo:
-       si no alimentas o juegas, el hambre va subiendo solo y la felicidad va bajando).</small></p>
+<section class="card {% if not mascota.esta_bien %}triste{% endif %}" id="tarjeta">
+    <div class="hero">
+        <div class="centro"><span class="avatar grande">{{ mascota.emoji }}</span></div>
+        <div class="datos">
+            <h1>{{ mascota.nombre }}</h1>
+            <span class="chip">{{ mascota.get_especie_display }}</span>
+            <span class="chip monedas">🪙 {{ monedas }}</span>
+            <p class="resultado" id="estado-texto">{% if mascota.esta_bien %}😊 ¡Feliz y sana!{% else %}😟 Necesita atención{% endif %}</p>
 
-    <p>Hambre: {{ mascota.hambre }} / 100</p>
-    <p>Felicidad: {{ mascota.felicidad }} / 100</p>
-    <p>🪙 Monedas: {{ monedas }}</p>
-    {% if error_monedas %}<p><small>⚠️ {{ error_monedas }}</small></p>{% endif %}
+            <div class="medidor">
+                <div class="et"><span>🍖 Hambre</span><span id="val-hambre">{{ mascota.hambre }}%</span></div>
+                <div class="barra hambre {% if mascota.hambre >= 70 %}alto{% endif %}" id="barra-hambre"><i style="--w: {{ mascota.hambre }}%"></i></div>
+            </div>
+            <div class="medidor">
+                <div class="et"><span>💖 Felicidad</span><span id="val-felicidad">{{ mascota.felicidad }}%</span></div>
+                <div class="barra {% if mascota.felicidad <= 30 %}bajo{% endif %}" id="barra-felicidad"><i style="--w: {{ mascota.felicidad }}%"></i></div>
+            </div>
+            <p class="peque">Se actualiza solita, sin recargar la página: si no la cuidas, le da hambre y se pone triste 🥺</p>
+        </div>
+    </div>
 
-    {% if mascota.esta_bien %}
-        <p>Estado: 😊 feliz y sana</p>
-    {% else %}
-        <p>Estado: 😟 necesita atencion</p>
+    {% if error_monedas %}
+        <div class="aviso aviso-warn"><span class="ico">🪙</span><div>{{ error_monedas }}</div></div>
     {% endif %}
 
-    <form action="{% url 'alimentar_mascota' mascota.id %}" method="post">
-        {% csrf_token %}
-        <button type="submit">🍖 Alimentar</button>
-    </form>
+    <div class="acciones">
+        <form action="{% url 'alimentar_mascota' mascota.id %}" method="post" data-carga="rapido">
+            {% csrf_token %}<button class="btn btn-sun" type="submit">🍖 Alimentar</button>
+        </form>
+        <form action="{% url 'jugar_mascota' mascota.id %}" method="post" data-carga="rapido">
+            {% csrf_token %}<button class="btn btn-mint" type="submit">🎾 Jugar</button>
+        </form>
+    </div>
+</section>
 
-    <form action="{% url 'jugar_mascota' mascota.id %}" method="post">
-        {% csrf_token %}
-        <button type="submit">🎾 Jugar</button>
-    </form>
+<div class="grid" style="margin-top: 1.1rem">
+    <a class="card item" style="--i: 1" href="{% url 'jugar_minijuego' mascota.id %}"><span class="emoji">🎮</span><b>Minijuego</b><small>Gana monedas</small></a>
+    <a class="card item" style="--i: 2" href="{% url 'listar_items' mascota.id %}"><span class="emoji">🛒</span><b>Tienda</b><small>Gasta tus monedas</small></a>
+    <a class="card item" style="--i: 3" href="{% url 'ver_inventario' mascota.id %}"><span class="emoji">🎒</span><b>Inventario</b><small>Lo que has comprado</small></a>
+    <a class="card item" style="--i: 4" href="{% url 'ver_curiosidades' mascota.id %}"><span class="emoji">🧠</span><b>Curiosidades</b><small>Datos de {{ mascota.get_especie_display }}</small></a>
+    <a class="card item" style="--i: 5" href="{% url 'preguntar_ia' mascota.id %}"><span class="emoji">🤖</span><b>Preguntar a la IA</b><small>Consejos de cuidado</small></a>
+</div>
 
-    <p><a href="{% url 'jugar_minijuego' mascota.id %}">🎮 Jugar minijuego (ganar monedas)</a></p>
-    <p><a href="{% url 'listar_items' mascota.id %}">🛒 Ir a la tienda</a></p>
-    <p><a href="{% url 'ver_inventario' mascota.id %}">🎒 Ver inventario</a></p>
-    <p><a href="{% url 'ver_curiosidades' mascota.id %}">🧠 Ver curiosidades</a></p>
-    <p><a href="{% url 'preguntar_ia' mascota.id %}">🤖 Preguntarle a la IA</a></p>
-
-    <hr>
-    <p><a href="{% url 'editar_mascota' mascota.id %}">✏️ Editar mascota</a></p>
-    <form action="{% url 'eliminar_mascota' mascota.id %}" method="post"
-          onsubmit="return confirm('¿Seguro que quieres eliminar a {{ mascota.nombre }}? Esto no se puede deshacer.');">
-        {% csrf_token %}
-        <button type="submit">🗑️ Eliminar mascota</button>
+<div class="fila" style="margin-top: 1.4rem">
+    <a class="btn btn-ghost btn-sm" href="{% url 'editar_mascota' mascota.id %}">✏️ Editar</a>
+    <form class="en-linea" action="{% url 'eliminar_mascota' mascota.id %}" method="post" data-confirm="¿Seguro que quieres eliminar a {{ mascota.nombre }}? Esto no se puede deshacer.">
+        {% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">🗑️ Eliminar</button>
     </form>
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Actualiza hambre/felicidad sin recargar la pagina (antes se recargaba todo cada 5 s).
+// Solo pregunta a Django, no a los microservicios, y se pausa si la pestaña esta oculta.
+(function () {
+    var url = "{% url 'estado_mascota' mascota.id %}";
+    function pintar(id, valor, claseExtra, condicion) {
+        var barra = document.getElementById('barra-' + id);
+        barra.firstElementChild.style.setProperty('--w', valor + '%');
+        barra.classList.toggle(claseExtra, condicion);
+        document.getElementById('val-' + id).textContent = valor + '%';
+    }
+    function actualizar() {
+        if (document.hidden || document.body.classList.contains('ocupado')) return;
+        fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+                if (!d) return;
+                pintar('hambre', d.hambre, 'alto', d.hambre >= 70);
+                pintar('felicidad', d.felicidad, 'bajo', d.felicidad <= 30);
+                document.getElementById('tarjeta').classList.toggle('triste', !d.esta_bien);
+                document.getElementById('estado-texto').textContent = d.esta_bien ? '😊 ¡Feliz y sana!' : '😟 Necesita atención';
+            })
+            .catch(function () {});
+    }
+    setInterval(actualizar, 5000);
+    document.addEventListener('visibilitychange', actualizar);
+})();
+</script>
+{% endblock %}

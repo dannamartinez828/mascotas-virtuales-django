@@ -1,35 +1,37 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Minijuego - {{ mascota.nombre }}</title>
-</head>
-<body>
-    <p><a href="{% url 'detalle_mascota' mascota.id %}">&larr; volver a {{ mascota.nombre }}</a></p>
+{% extends 'base.html' %}
+{% block title %}Minijuego{% endblock %}
+{% block content %}
+<a class="volver" href="{% url 'detalle_mascota' mascota.id %}">← Volver a {{ mascota.nombre }}</a>
+<div class="card centro">
     <h1>🎮 Piedra, papel o tijera</h1>
-    <p>Gana monedas para gastar en la tienda. Ganar: +10 monedas. Empate: +2. Perder: +0.</p>
+    <p class="sub">Ganar +10 🪙 · Empate +2 🪙 · Perder +0 🪙</p>
+    <span class="chip monedas">🪙 {{ monedas }} monedas</span>
 
-    <p><strong>Monedas actuales: {{ monedas }}</strong></p>
-    {% if error %}<p>⚠️ {{ error }}</p>{% endif %}
-
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" name="eleccion" value="piedra">🪨 Piedra</button>
-        <button type="submit" name="eleccion" value="papel">📄 Papel</button>
-        <button type="submit" name="eleccion" value="tijera">✂️ Tijera</button>
-    </form>
+    {% if error %}<div class="aviso aviso-warn"><span class="ico">🪙</span><div>{{ error }}</div></div>{% endif %}
 
     {% if resultado %}
-        <h3>
-            {% if resultado == 'ganaste' %}
-                🎉 ¡Ganaste! +{{ monedas_ganadas }} monedas
-            {% elif resultado == 'empate' %}
-                🤝 Empate. +{{ monedas_ganadas }} monedas
-            {% else %}
-                😅 Perdiste. +0 monedas
-            {% endif %}
-        </h3>
-        <p>La maquina eligio: {{ eleccion_pc }}</p>
+    <div class="versus">
+        <div class="lado">{% if eleccion_usuario == 'piedra' %}🪨{% elif eleccion_usuario == 'papel' %}📄{% else %}✂️{% endif %}<small>Tú</small></div>
+        <div class="vs">VS</div>
+        <div class="lado" style="animation-delay: .25s">{% if eleccion_pc == 'piedra' %}🪨{% elif eleccion_pc == 'papel' %}📄{% else %}✂️{% endif %}<small>Máquina</small></div>
+    </div>
+    <p class="resultado">
+        {% if resultado == 'ganaste' %}🎉 ¡Ganaste! +{{ monedas_ganadas }} monedas
+        {% elif resultado == 'empate' %}🤝 Empate · +{{ monedas_ganadas }} monedas
+        {% else %}😅 Perdiste esta vez · +0 monedas{% endif %}
+    </p>
     {% endif %}
-</body>
-</html>
+
+    <form method="post" data-carga="juego">
+        {% csrf_token %}
+        <p class="peque" style="margin-top: 1rem">{% if resultado %}¿La revancha?{% else %}Elige tu jugada:{% endif %}</p>
+        <div class="jugadas">
+            <button class="btn jugada" type="submit" name="eleccion" value="piedra"><span>🪨</span>Piedra</button>
+            <button class="btn jugada" type="submit" name="eleccion" value="papel"><span>📄</span>Papel</button>
+            <button class="btn jugada" type="submit" name="eleccion" value="tijera"><span>✂️</span>Tijera</button>
+        </div>
+    </form>
+    <a class="btn btn-sun btn-sm" href="{% url 'listar_items' mascota.id %}">🛒 Ir a la tienda</a>
+</div>
+{% endblock %}
+{% block scripts %}{% if resultado == 'ganaste' %}<script>lanzarConfeti();</script>{% endif %}{% endblock %}

@@ -1,46 +1,37 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Administrar curiosidades</title>
-</head>
-<body>
-    <p><a href="{% url 'listar_mascotas' %}">&larr; volver</a></p>
-    <h1>🗂️ Administrar curiosidades (Neon)</h1>
-    <p><small>Estas curiosidades viven en la base de datos PostgreSQL de Neon, no en el
-       SQLite de Django. Crear, editar o eliminar aqui modifica esa base de datos en
-       tiempo real, a traves de microservicios. Para cada operacion puedes elegir si la
-       ejecuta el microservicio en Python, en Node.js, en Java o en Go.</small></p>
+{% extends 'base.html' %}
+{% block title %}Administrar curiosidades{% endblock %}
+{% block content %}
+<div class="cabecera">
+    <div>
+        <h1>🗂️ Administrar curiosidades</h1>
+        <p class="sub">Viven en Neon. Para cada operación eliges qué microservicio la ejecuta: <span class="chip lang-python">🐍 Python</span> <span class="chip lang-node">🟩 Node</span> <span class="chip lang-java">☕ Java</span> <span class="chip lang-go">🐹 Go</span></p>
+    </div>
+    <a class="btn btn-pri" href="{% url 'crear_curiosidad' %}">＋ Nueva curiosidad</a>
+</div>
+{% if fuente_datos %}<p><span class="chip {% if respaldo_activo %}chip-sun{% else %}chip-mint{% endif %}">📡 Lista servida por {{ fuente_datos }}</span></p>{% endif %}
 
-    {% if messages %}
-        {% for m in messages %}
-            <p>{% if m.tags == 'error' %}⚠️{% else %}✅{% endif %} {{ m }}</p>
-        {% endfor %}
-    {% endif %}
-
-    <p><a href="{% url 'crear_curiosidad' %}">+ Nueva curiosidad</a></p>
-
-    {% if error %}
-        <p>⚠️ {{ error }}</p>
-    {% elif curiosidades %}
-        <ul>
+{% if error %}
+    <div class="aviso aviso-warn"><span class="ico">😿</span><div>{{ error }}</div></div>
+{% elif curiosidades %}
+    <div class="grid" style="grid-template-columns: 1fr">
         {% for c in curiosidades %}
-            <li>
-                <strong>{{ c.especie }}</strong>: {{ c.texto }}
-                · <a href="{% url 'editar_curiosidad' c.id %}">editar</a>
-                · <form action="{% url 'eliminar_curiosidad' c.id %}" method="post" style="display:inline"
-                        onsubmit="return confirm('¿Eliminar esta curiosidad de Neon?');">
+        <div class="card" style="--i: {{ forloop.counter0 }}; padding: 1rem 1.2rem">
+            <p><span class="chip">{{ c.especie }}</span> {{ c.texto }}</p>
+            <div class="fila izq">
+                <a class="btn btn-ghost btn-sm" href="{% url 'editar_curiosidad' c.id %}">✏️ Editar</a>
+                <form class="en-linea" action="{% url 'eliminar_curiosidad' c.id %}" method="post" data-confirm="¿Eliminar esta curiosidad de Neon?">
                     {% csrf_token %}
-                    <button type="submit" name="via" value="python">eliminar con Python 🐍</button>
-                    <button type="submit" name="via" value="node">eliminar con Node 🟩</button>
-                    <button type="submit" name="via" value="java">eliminar con Java ☕</button>
-                    <button type="submit" name="via" value="go">eliminar con Go 🐹</button>
+                    <span class="peque">Eliminar con:</span>
+                    <button class="btn btn-sm lang-python" type="submit" name="via" value="python">🐍 Python</button>
+                    <button class="btn btn-sm lang-node" type="submit" name="via" value="node">🟩 Node</button>
+                    <button class="btn btn-sm lang-java" type="submit" name="via" value="java">☕ Java</button>
+                    <button class="btn btn-sm lang-go" type="submit" name="via" value="go">🐹 Go</button>
                 </form>
-            </li>
+            </div>
+        </div>
         {% endfor %}
-        </ul>
-    {% else %}
-        <p>No hay curiosidades cargadas todavia.</p>
-    {% endif %}
-</body>
-</html>
+    </div>
+{% else %}
+    <div class="card vacio"><span class="avatar">📭</span><h2>No hay curiosidades todavía</h2><p class="sub">Crea la primera.</p></div>
+{% endif %}
+{% endblock %}

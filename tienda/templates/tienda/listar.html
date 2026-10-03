@@ -1,37 +1,40 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Tienda</title>
-</head>
-<body>
-    <p><a href="{% url 'detalle_mascota' mascota.id %}">&larr; volver a {{ mascota.nombre }}</a></p>
-    <h1>🛒 Tienda para {{ mascota.nombre }}</h1>
-    <p><strong>🪙 Monedas: {{ monedas }}</strong>
-       — <a href="{% url 'jugar_minijuego' mascota.id %}">ganar mas jugando</a></p>
-    {% if error %}<p>⚠️ {{ error }}</p>{% endif %}
+{% extends 'base.html' %}
+{% block title %}Tienda{% endblock %}
+{% block content %}
+<a class="volver" href="{% url 'detalle_mascota' mascota.id %}">← Volver a {{ mascota.nombre }}</a>
+<div class="cabecera">
+    <div>
+        <h1>🛒 Tienda para {{ mascota.nombre }}</h1>
+        <p class="sub">Lo que compres va a tu <a href="{% url 'ver_inventario' mascota.id %}">inventario</a> y lo usas cuando quieras.</p>
+    </div>
+    <div class="fila">
+        <span class="chip monedas">🪙 {{ monedas }}</span>
+        <a class="btn btn-sun btn-sm" href="{% url 'jugar_minijuego' mascota.id %}">🎮 Ganar más</a>
+    </div>
+</div>
+{% if error %}<div class="aviso aviso-warn"><span class="ico">🪙</span><div>{{ error }}</div></div>{% endif %}
 
-    <p><small>Lo que compres se guarda en tu <a href="{% url 'ver_inventario' mascota.id %}">inventario</a>,
-       no se usa automaticamente.</small></p>
-
-    {% if items %}
-        <ul>
-        {% for item in items %}
-            <li>
-                {{ item.emoji }} {{ item.nombre }}
-                (+{{ item.precio_felicidad }} felicidad, -{{ item.reduce_hambre }} hambre)
-                — costo: 🪙 {{ item.costo }}
-                <form action="{% url 'comprar_item' mascota.id item.id %}" method="post" style="display:inline">
-                    {% csrf_token %}
-                    <button type="submit" {% if monedas < item.costo %}disabled{% endif %}>
-                        {% if monedas < item.costo %}Monedas insuficientes{% else %}Comprar{% endif %}
-                    </button>
-                </form>
-            </li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>No hay items en la tienda todavia. Agrega algunos desde el admin.</p>
-    {% endif %}
-</body>
-</html>
+{% if items %}
+<div class="grid">
+    {% for item in items %}
+    <div class="card item" style="--i: {{ forloop.counter0 }}">
+        <span class="emoji">{{ item.emoji }}</span>
+        <h2>{{ item.nombre }}</h2>
+        <div class="efectos">
+            <span class="chip chip-pink">💖 +{{ item.precio_felicidad }}</span>
+            <span class="chip chip-sun">🍖 −{{ item.reduce_hambre }}</span>
+        </div>
+        <span class="chip monedas">🪙 {{ item.costo }}</span>
+        <form action="{% url 'comprar_item' mascota.id item.id %}" method="post" data-carga="juego" style="width:100%">
+            {% csrf_token %}
+            <button class="btn btn-pri btn-block" type="submit" {% if monedas < item.costo %}disabled{% endif %}>
+                {% if monedas < item.costo %}Monedas insuficientes{% else %}Comprar{% endif %}
+            </button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card vacio"><span class="avatar">🏪</span><h2>La tienda está vacía</h2><p class="sub">Agrega productos desde el panel de administración.</p></div>
+{% endif %}
+{% endblock %}

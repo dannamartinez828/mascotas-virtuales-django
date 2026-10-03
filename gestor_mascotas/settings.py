@@ -71,6 +71,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'gestor_mascotas.resiliencia.FuenteDatosMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -86,6 +87,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'gestor_mascotas.resiliencia.fuente_datos',
             ],
         },
     },
@@ -159,6 +161,10 @@ STORAGES = {
 # En local usa localhost:3000; en produccion se define con la variable de entorno.
 MICROSERVICIO_URL = os.environ.get('MICROSERVICIO_URL', 'http://localhost:3000')
 
+# RESILIENCIA: microservicio de lectura de respaldo (Go). Si el de Node.js falla,
+# la app llama a este y sigue mostrando la informacion (ver gestor_mascotas/resiliencia.py).
+MICROSERVICIO_RESPALDO_URL = os.environ.get('MICROSERVICIO_RESPALDO_URL', 'http://localhost:7000')
+
 # Microservicios en Python (Flask + Neon) que escriben en la tabla curiosidades:
 # uno por operacion. En local corren en los puertos 5001/5002/5003; en
 # produccion se definen estas variables con las URLs de Render.
@@ -189,6 +195,10 @@ GO_ELIMINAR_URL = os.environ.get('GO_ELIMINAR_URL', 'http://localhost:7003')
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
 GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 GROQ_MODEL = 'openai/gpt-oss-20b'
+
+# para no saturar la IA: segundos que debe esperar cada visitante entre una pregunta y otra
+IA_ESPERA_SEGUNDOS = 8
+IA_MAX_CARACTERES = 400
 
 
 # Email

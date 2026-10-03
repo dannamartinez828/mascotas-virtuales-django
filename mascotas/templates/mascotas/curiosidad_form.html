@@ -1,42 +1,36 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>{% if curiosidad %}Editar{% else %}Nueva{% endif %} curiosidad</title>
-</head>
-<body>
-    <p><a href="{% url 'gestionar_curiosidades' %}">&larr; volver</a></p>
-    <h1>{% if curiosidad %}Editar curiosidad{% else %}Nueva curiosidad{% endif %}</h1>
-    <p><small>{% if curiosidad %}Al guardar se ejecuta un UPDATE{% else %}Al guardar se ejecuta un INSERT{% endif %}
-       sobre la tabla <code>curiosidades</code> en Neon.</small></p>
+{% extends 'base.html' %}
+{% block title %}{% if curiosidad %}Editar curiosidad{% else %}Nueva curiosidad{% endif %}{% endblock %}
+{% block content %}
+<a class="volver" href="{% url 'gestionar_curiosidades' %}">← Volver</a>
+<div class="card formulario">
+    <div class="centro">
+        <span class="avatar">💡</span>
+        <h1>{% if curiosidad %}Editar curiosidad{% else %}Nueva curiosidad{% endif %}</h1>
+        <p class="sub">Se guarda en Neon a través de un microservicio. ¡Tú eliges en qué lenguaje!</p>
+    </div>
 
-    {% if error %}
-        <p>⚠️ {{ error }}</p>
-    {% endif %}
+    {% if error %}<div class="aviso aviso-warn"><span class="ico">😿</span><div>{{ error }}</div></div>{% endif %}
 
-    <form method="post">
+    <form method="post" data-carga="defecto">
         {% csrf_token %}
-        <label>Especie:
-            <select name="especie">
-                {% for valor, nombre in especies %}
-                    <option value="{{ valor }}" {% if curiosidad.especie == valor %}selected{% endif %}>{{ nombre }}</option>
-                {% endfor %}
-            </select>
-        </label><br><br>
-        <label>Texto:<br>
-            <textarea name="texto" rows="3" cols="50" required>{{ curiosidad.texto }}</textarea>
-        </label><br><br>
-        {% if curiosidad %}
-            <button type="submit" name="via" value="python">Actualizar con Python 🐍</button>
-            <button type="submit" name="via" value="node">Actualizar con Node 🟩</button>
-            <button type="submit" name="via" value="java">Actualizar con Java ☕</button>
-            <button type="submit" name="via" value="go">Actualizar con Go 🐹</button>
-        {% else %}
-            <button type="submit" name="via" value="python">Insertar con Python 🐍</button>
-            <button type="submit" name="via" value="node">Insertar con Node 🟩</button>
-            <button type="submit" name="via" value="java">Insertar con Java ☕</button>
-            <button type="submit" name="via" value="go">Insertar con Go 🐹</button>
-        {% endif %}
+        <label>Especie</label>
+        <div class="picker">
+            {% for valor, nombre, emoji in especies %}
+                <input type="radio" name="especie" id="esp-{{ valor }}" value="{{ valor }}" {% if curiosidad and valor == curiosidad.especie %}checked{% elif not curiosidad and forloop.first %}checked{% endif %}>
+                <label class="opt" for="esp-{{ valor }}"><span>{{ emoji }}</span>{{ nombre }}</label>
+            {% endfor %}
+        </div>
+
+        <label for="texto">Texto</label>
+        <textarea id="texto" name="texto" rows="4" placeholder="Escribe un dato curioso…" required>{% if curiosidad %}{{ curiosidad.texto }}{% endif %}</textarea>
+
+        <p class="peque" style="margin-top: 1rem">{% if curiosidad %}Actualizar{% else %}Insertar{% endif %} con el microservicio en:</p>
+        <div class="fila izq">
+            <button class="btn lang-python" type="submit" name="via" value="python">🐍 Python</button>
+            <button class="btn lang-node" type="submit" name="via" value="node">🟩 Node</button>
+            <button class="btn lang-java" type="submit" name="via" value="java">☕ Java</button>
+            <button class="btn lang-go" type="submit" name="via" value="go">🐹 Go</button>
+        </div>
     </form>
-</body>
-</html>
+</div>
+{% endblock %}

@@ -1,27 +1,24 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Curiosidades de {{ mascota.nombre }}</title>
-</head>
-<body>
-    <p><a href="{% url 'detalle_mascota' mascota.id %}">&larr; volver a {{ mascota.nombre }}</a></p>
-    <h1>🧠 Curiosidades sobre {{ mascota.get_especie_display }}</h1>
-    <p><small>Estos datos vienen de un microservicio propio en Node.js
-       (desplegado en Render) que consulta una base de datos PostgreSQL en Neon.</small></p>
+{% extends 'base.html' %}
+{% block title %}Curiosidades{% endblock %}
+{% block content %}
+<a class="volver" href="{% url 'detalle_mascota' mascota.id %}">← Volver a {{ mascota.nombre }}</a>
+<div class="cabecera">
+    <div>
+        <h1>🧠 Curiosidades sobre {{ mascota.get_especie_display }}</h1>
+        <p class="sub">Datos guardados en Neon, entregados por microservicios.</p>
+    </div>
+    {% if fuente_datos %}<span class="chip {% if respaldo_activo %}chip-sun{% else %}chip-mint{% endif %}">📡 Servido por {{ fuente_datos }}</span>{% endif %}
+</div>
 
-    {% if error %}
-        <p>⚠️ {{ error }}</p>
-        <p>(Si estas corriendo esto en local, asegurate de tener el microservicio
-        levantado en <code>MICROSERVICIO_URL</code>, por defecto <code>http://localhost:3000</code>.)</p>
-    {% elif curiosidades %}
-        <ul>
+{% if error %}
+    <div class="aviso aviso-warn"><span class="ico">😿</span><div>{{ error }}<br><small>Si estás en local, revisa que estén corriendo el microservicio de Node.js (puerto 3000) o el de respaldo en Go (puerto 7000).</small></div></div>
+{% elif curiosidades %}
+    <div class="grid">
         {% for c in curiosidades %}
-            <li>{{ c.texto }}</li>
+        <div class="card dato" style="--i: {{ forloop.counter0 }}"><span class="bombilla">💡</span><div>{{ c.texto }}</div></div>
         {% endfor %}
-        </ul>
-    {% else %}
-        <p>No hay curiosidades cargadas para esta especie todavia.</p>
-    {% endif %}
-</body>
-</html>
+    </div>
+{% else %}
+    <div class="card vacio"><span class="avatar">🔍</span><h2>Aún no hay curiosidades</h2><p class="sub">No hay datos cargados para esta especie todavía.</p></div>
+{% endif %}
+{% endblock %}

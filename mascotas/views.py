@@ -1,12 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.contrib import messages
+from django.http import JsonResponse
 import random
+import time
 import requests
-from .models import Mascota, ESPECIES
+from .models import Mascota, ESPECIES_UI
 from gestor_mascotas.microservicio_client import (
     obtener_monedas, ganar_monedas,
-    listar_curiosidades, insertar_curiosidad, actualizar_curiosidad, eliminar_curiosidad,
+    listar_curiosidades, curiosidades_por_especie,
+    insertar_curiosidad, actualizar_curiosidad, eliminar_curiosidad,
 )
 
 OPCIONES_JUEGO = ('piedra', 'papel', 'tijera')
@@ -28,6 +31,18 @@ def detalle_mascota(request, mascota_id):
     return render(request, 'mascotas/detalle.html', context)
 
 
+def estado_mascota(request, mascota_id):
+    # lo consulta el JavaScript de la pagina de detalle cada pocos segundos para
+    # actualizar las barras SIN recargar la pagina y SIN tocar los microservicios
+    mascota = get_object_or_404(Mascota, id=mascota_id)
+    mascota.actualizar_por_tiempo()
+    return JsonResponse({
+        'hambre': mascota.hambre,
+        'felicidad': mascota.felicidad,
+        'esta_bien': mascota.esta_bien(),
+    })
+
+
 def crear_mascota(request):
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
@@ -35,7 +50,7 @@ def crear_mascota(request):
         if nombre:
             Mascota.objects.create(nombre=nombre, especie=especie)
             return redirect('listar_mascotas')
-    return render(request, 'mascotas/crear.html', {'especies': ESPECIES})
+    return render(request, 'mascotas/crear.html', {'especies': ESPECIES_UI})
 
 
 def editar_mascota(request, mascota_id):
@@ -51,7 +66,7 @@ def editar_mascota(request, mascota_id):
             mascota.save()
             return redirect('detalle_mascota', mascota_id=mascota.id)
 
-    context = {'mascota': mascota, 'especies': ESPECIES}
+    context = {'mascota': mascota, 'especies': ESPECIES_UI}
     return render(request, 'mascotas/editar.html', context)
 
 
@@ -89,18 +104,10 @@ def jugar_mascota(request, mascota_id):
 
 def ver_curiosidades(request, mascota_id):
     # vista que consulta el modelo Mascota (shortcut get_object_or_404)
-    # y ademas consume un microservicio propio (Node.js + Neon) desplegado en Render
+    # y ademas consume microservicios propios (Neon). Con RESILIENCIA: si el de
+    # Node.js falla, la lectura se hace con el de respaldo escrito en Go.
     mascota = get_object_or_404(Mascota, id=mascota_id)
-
-    curiosidades = []
-    error = None
-    try:
-        url = f"{settings.MICROSERVICIO_URL}/api/curiosidades/{mascota.especie}"
-        respuesta = requests.get(url, timeout=5)
-        respuesta.raise_for_status()
-        curiosidades = respuesta.json()
-    except requests.RequestException as e:
-        error = f"No se pudo contactar el microservicio: {e}"
+    curiosidades, error = curiosidades_por_especie(mascota.especie)
 
     # patron visto en clase: la vista arma un context y se lo pasa al template
     context = {
@@ -140,14 +147,22 @@ def preguntar_ia(request, mascota_id):
     pregunta = ''
     respuesta = None
     error = None
+    espera = 0  # segundos que el boton queda desactivado en pantalla
 
     if request.method == 'POST':
-        pregunta = request.POST.get('pregunta', '').strip()
+        pregunta = request.POST.get('pregunta', '').strip()[:settings.IA_MAX_CARACTERES]
+        # para no saturar la IA (tiene limite de peticiones): una pregunta cada X segundos por visitante
+        faltan = settings.IA_ESPERA_SEGUNDOS - (time.time() - request.session.get('ia_ultima', 0))
         if not pregunta:
             error = 'Escribe una pregunta primero.'
+        elif faltan > 0:
+            espera = int(faltan) + 1
+            error = f'¡Con calma! Espera {espera} segundos antes de preguntar otra vez.'
         elif not settings.GROQ_API_KEY:
             error = 'Falta configurar GROQ_API_KEY para poder usar la IA.'
         else:
+            request.session['ia_ultima'] = time.time()
+            espera = settings.IA_ESPERA_SEGUNDOS
             try:
                 headers = {
                     'Authorization': f'Bearer {settings.GROQ_API_KEY}',
@@ -192,14 +207,21 @@ def preguntar_ia(request, mascota_id):
                 resp.raise_for_status()
                 data = resp.json()
                 respuesta = data['choices'][0]['message']['content']
-            except requests.RequestException as e:
-                error = f'No se pudo contactar la IA: {e}'
+            except requests.HTTPError as e:
+                if e.response is not None and e.response.status_code == 429:
+                    error = 'La IA esta muy ocupada ahora mismo. Intenta de nuevo en unos segundos.'
+                else:
+                    error = 'La IA no pudo responder esta vez. Intenta de nuevo en un momento.'
+            except requests.RequestException:
+                error = 'No se pudo contactar la IA. Revisa tu conexion e intenta otra vez.'
 
     context = {
         'mascota': mascota,
         'pregunta': pregunta,
         'respuesta': respuesta,
         'error': error,
+        'espera': espera,
+        'max_caracteres': settings.IA_MAX_CARACTERES,
     }
     return render(request, 'mascotas/preguntar_ia.html', context)
 
@@ -213,6 +235,7 @@ def jugar_minijuego(request, mascota_id):
     mascota.actualizar_por_tiempo()
 
     resultado = None
+    eleccion_usuario = None
     eleccion_pc = None
     monedas_ganadas = 0
     error = None
@@ -240,6 +263,7 @@ def jugar_minijuego(request, mascota_id):
     context = {
         'mascota': mascota,
         'resultado': resultado,
+        'eleccion_usuario': eleccion_usuario,
         'eleccion_pc': eleccion_pc,
         'monedas_ganadas': monedas_ganadas,
         'monedas': monedas,
@@ -278,7 +302,7 @@ def crear_curiosidad(request):
             if not error:
                 messages.success(request, f"Curiosidad insertada con el microservicio de {NOMBRE_VIA[via]}.")
                 return redirect('gestionar_curiosidades')
-    return render(request, 'mascotas/curiosidad_form.html', {'especies': ESPECIES, 'error': error})
+    return render(request, 'mascotas/curiosidad_form.html', {'especies': ESPECIES_UI, 'error': error})
 
 
 def editar_curiosidad(request, curiosidad_id):
@@ -302,7 +326,7 @@ def editar_curiosidad(request, curiosidad_id):
             return redirect('gestionar_curiosidades')
 
     return render(request, 'mascotas/curiosidad_form.html',
-                  {'curiosidad': curiosidad, 'especies': ESPECIES, 'error': error})
+                  {'curiosidad': curiosidad, 'especies': ESPECIES_UI, 'error': error})
 
 
 def eliminar_curiosidad_vista(request, curiosidad_id):

@@ -1,24 +1,27 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Adoptar mascota</title>
-</head>
-<body>
-    <p><a href="{% url 'listar_mascotas' %}">&larr; volver</a></p>
-    <h1>Adoptar una mascota nueva</h1>
-
-    <form method="post">
+{% extends 'base.html' %}
+{% block title %}Adoptar mascota{% endblock %}
+{% block content %}
+<a class="volver" href="{% url 'listar_mascotas' %}">← Volver</a>
+<div class="card formulario">
+    <div class="centro">
+        <span class="avatar">🥚</span>
+        <h1>Adoptar una mascota</h1>
+        <p class="sub">Elige quién se unirá a tu familia.</p>
+    </div>
+    <form method="post" data-carga="rapido">
         {% csrf_token %}
-        <label>Nombre: <input type="text" name="nombre" required></label><br><br>
-        <label>Especie:
-            <select name="especie">
-                {% for valor, nombre in especies %}
-                    <option value="{{ valor }}">{{ nombre }}</option>
-                {% endfor %}
-            </select>
-        </label><br><br>
-        <button type="submit">Adoptar</button>
+        <label for="nombre">¿Cómo se llamará?</label>
+        <input id="nombre" type="text" name="nombre" maxlength="50" placeholder="Ej: Luna" required autofocus>
+
+        <label>¿Qué especie es?</label>
+        <div class="picker">
+            {% for valor, nombre, emoji in especies %}
+                <input type="radio" name="especie" id="esp-{{ valor }}" value="{{ valor }}" {% if forloop.first %}checked{% endif %}>
+                <label class="opt" for="esp-{{ valor }}"><span>{{ emoji }}</span>{{ nombre }}</label>
+            {% endfor %}
+        </div>
+
+        <div style="margin-top: 1.4rem"><button class="btn btn-pri btn-block" type="submit">🐾 Adoptar</button></div>
     </form>
-</body>
-</html>
+</div>
+{% endblock %}

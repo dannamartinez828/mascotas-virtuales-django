@@ -8,6 +8,11 @@ ESPECIES = (
     ('robot', 'Robot'),
 )
 
+# emoji de cada especie para la interfaz, y la lista (valor, nombre, emoji)
+# que usan los formularios de crear/editar
+ESPECIES_EMOJI = {'perro': '🐶', 'gato': '🐱', 'dragon': '🐲', 'robot': '🤖'}
+ESPECIES_UI = [(valor, nombre, ESPECIES_EMOJI[valor]) for valor, nombre in ESPECIES]
+
 # cada cuantos SEGUNDOS sin interactuar se le sube el hambre / baja la felicidad.
 # pensado para que en una demo en vivo se note el cambio en unos 15-20 segundos,
 # sin que sea tan rapido que se vea descontrolado.
@@ -23,6 +28,10 @@ class Mascota(models.Model):
     felicidad = models.IntegerField(default=50)   # 0 = triste, 100 = feliz
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     ultima_interaccion = models.DateTimeField(default=timezone.now)
+
+    @property
+    def emoji(self):
+        return ESPECIES_EMOJI.get(self.especie, '🐾')
 
     def esta_bien(self):
         return self.hambre < 70 and self.felicidad > 30
